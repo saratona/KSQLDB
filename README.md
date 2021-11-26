@@ -10,9 +10,15 @@ https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema
 
 metterli nella cartella connectors entrambi in una cartella
 
+startare tutti i docker del docker-compose.yml
+
     docker-compose up
+    
+runnare docker ksqldb CLI:
 
     docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
+    
+creare connettore SSE tra Wikimedia e il topic di Kafka "wikipedia.parsed": 
 
     CREATE SOURCE CONNECTOR wikimedia_sse WITH (
         'connector.class' = 'com.github.cjmatta.kafka.connect.sse.ServerSentEventsSourceConnector',
