@@ -39,7 +39,7 @@ creare connettore SSE tra Wikimedia e il topic di Kafka "wikipedia.parsed":
         'transforms.parseJSON.json.schema.validation.enabled' = 'false',
         'producer.interceptor.classes' = 'io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor',
         'value.converter' = 'io.confluent.connect.avro.AvroConverter',
-        'value.converter.schema.registry.url' = 'http://schemaregistry:8085',
+        'value.converter.schema.registry.url' = 'http://schemaregistry:8081',
         'tasks.max' = '1'
     );
 
