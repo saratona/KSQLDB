@@ -10,7 +10,8 @@ https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema
 
 metterli nella cartella connectors entrambi in una cartella
 
-startare tutti i docker del docker-compose.yml
+
+per startare tutti i docker del docker-compose.yml:
 
     docker-compose up
     
