@@ -121,7 +121,6 @@ services:
   connect:
     image: confluentinc/cp-kafka-connect:latest
     container_name: connect
-    restart: always
     #build:
       #context: .
       #dockerfile: Dockerfile
@@ -130,6 +129,8 @@ services:
       - schema-registry
     ports:
       - 8083:8083
+    volumes:
+      - "./connectors/:/usr/share/confluent-hub-components"
     environment:
       #CUB_CLASSPATH: '/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*:/usr/share/java/cp-base-new/*'
 
