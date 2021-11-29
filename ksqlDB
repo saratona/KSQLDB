@@ -1,1 +1,0 @@
-docker exec -t -i 6f ksql -u ksqlDBUser -p ksqlDBUser http://ksqldb-server:8088
