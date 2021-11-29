@@ -20,12 +20,14 @@ services:
     depends_on:
       - zookeeper
     ports:
+      - "9092:9092"
       - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schemaregistry:8081
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -43,6 +45,12 @@ services:
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "broker:9092"
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
+      SCHEMA_REGISTRY_DEBUG: 'true'
+      SCHEMA_REGISTRY_CONFLUENT_METADATA_BOOTSTRAP_SERVER_URLS: "broker:9092"
 
   ksqldb-server:
     image: confluentinc/ksqldb-server:latest
@@ -109,3 +117,60 @@ services:
       SERVER_MAXPAYLOADBYTES: 4194304
       KIBANA_AUTOCOMPLETETIMEOUT: 3000
       KIBANA_AUTOCOMPLETETERMINATEAFTER: 2500000
+
+  connect:
+    image: confluentinc/cp-kafka-connect:latest
+    container_name: connect
+    restart: always
+    #build:
+      #context: .
+      #dockerfile: Dockerfile
+    depends_on:
+      - broker
+      - schema-registry
+    ports:
+      - 8083:8083
+    environment:
+      #CUB_CLASSPATH: '/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*:/usr/share/java/cp-base-new/*'
+
+      CONNECT_BOOTSTRAP_SERVERS: broker:9092
+      CONNECT_REST_PORT: 8083
+      CONNECT_LISTENERS: http://0.0.0.0:8083
+      CONNECT_GROUP_ID: "connect-cluster"
+      CONNECT_PRODUCER_CLIENT_ID: "connect-worker-producer"
+      CONNECT_PRODUCER_ENABLE_IDEMPOTENCE: 'true'
+
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-statuses
+
+      CONNECT_REPLICATION_FACTOR: 1 #questi 4 cambiati da 2 a 1
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      #CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+      #CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
+      #CLASSPATH: "/usr/share/java/kafka-connect-replicator/replicator-rest-extension-${CONNECTOR_VERSION}.jar:/usr/share/java/monitoring-interceptors/*"
+
+    
+      # Connect Consumer
+      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+
+      # io.confluent.connect.replicator.monitoring.ReplicatorMonitoringExtension - Confluent Replicator
+      # io.confluent.connect.security.ConnectSecurityExtension - RBAC
+      # io.confluent.connect.secretregistry.ConnectSecretRegistryExtension - Secret Registry
+
+      # Used by Connect's REST layer to connect to MDS to verify tokens and authenticate clients
+      CONNECT_CONFLUENT_METADATA_BOOTSTRAP_SERVER_URLS: http://broker:8092
+
+      # Reduce Connect memory utilization
+      KAFKA_JVM_PERFORMANCE_OPTS: -server -XX:+UseG1GC -XX:GCTimeRatio=1
+                  -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20
+                  -XX:MaxGCPauseMillis=10000 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent
+                  -XX:MaxInlineLevel=15 -Djava.awt.headless=true
