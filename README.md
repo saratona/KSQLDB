@@ -44,8 +44,6 @@ Create the connector between Wikimedia and Kafka topic 'wikipedia.parsed':
     EOF
     )
 
-docker-compose exec connect curl -X POST -H "${HEADER}" --data "${DATA}" http://connect:8083/connectors || exit 1
-
     
 runnare docker ksqldb CLI:
 
@@ -60,6 +58,45 @@ Run this query in ksql:
     CREATE STREAM wikipediabot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = true AND length IS NOT NULL AND length->new IS NOT NULL AND length->old IS NOT NULL;
     
     CREATE TABLE wikipedia_count_gt_1 WITH (key_format='JSON') AS SELECT user, meta->uri AS URI, count(*) AS COUNT FROM wikipedia WINDOW TUMBLING (size 300 second) WHERE meta->domain = 'commons.wikimedia.org' GROUP BY user, meta->uri HAVING count(*) > 1;
+    
+Now we want to create the connector with Kibana/Elasticsearch and create the index pattern:
+
+Run the 'set_elasticsearch_mapping_bot.sh' file and 'set_elasticsearch_mapping_count.sh' in the folder dashboard.
+Create the connector:
+
+    #!/bin/bash
+
+    HEADER="Content-Type: application/json"
+    DATA=$( cat << EOF
+    {
+      "name": "elasticsearch-ksqldb",
+      "config": {
+        "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+        "consumer.interceptor.classes": "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor",
+        "topics": "WIKIPEDIABOT",
+        "topic.index.map": "WIKIPEDIABOT:wikipediabot",
+        "connection.url": "http://elasticsearch:9200",
+        "type.name": "_doc",
+        "key.ignore": true,
+        "key.converter.schema.registry.url": "http://schema-registry:8081",
+        "value.converter": "io.confluent.connect.avro.AvroConverter",
+        "value.converter.schema.registry.url": "http://schema-registry:8081",
+        "schema.ignore": true
+
+      }
+    }
+    EOF
+    )
+    
+Create the dashboards to visualize the data on Kibana, running the file 'configure_kibana_dashboard.sh' in the folder dashboard.
+
+
+
+
+
+
+docker-compose exec connect curl -X POST -H "${HEADER}" --data "${DATA}" http://connect:8083/connectors || exit 1
+
  
 #Add the custom query property earliest for the auto.offset.reset parameter. This instructs ksqlDB queries to read all available topic data from the beginning. This configuration is used for each subsequent query:
 
