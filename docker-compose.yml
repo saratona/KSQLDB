@@ -122,9 +122,6 @@ services:
   connect:
     image: confluentinc/cp-kafka-connect:latest
     container_name: connect
-    #build:
-      #context: .
-      #dockerfile: Dockerfile
     depends_on:
       - broker
       - schema-registry
@@ -133,8 +130,6 @@ services:
     volumes:
       - "./connectors/:/usr/share/confluent-hub-components"
     environment:
-      #CUB_CLASSPATH: '/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*:/usr/share/java/cp-base-new/*'
-
       CONNECT_BOOTSTRAP_SERVERS: broker:9092
       CONNECT_REST_PORT: 8083
       CONNECT_LISTENERS: http://0.0.0.0:8083
@@ -156,17 +151,10 @@ services:
 
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
-      #CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
-      #CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
       #CLASSPATH: "/usr/share/java/kafka-connect-replicator/replicator-rest-extension-${CONNECTOR_VERSION}.jar:/usr/share/java/monitoring-interceptors/*"
 
-    
       # Connect Consumer
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
-
-      # io.confluent.connect.replicator.monitoring.ReplicatorMonitoringExtension - Confluent Replicator
-      # io.confluent.connect.security.ConnectSecurityExtension - RBAC
-      # io.confluent.connect.secretregistry.ConnectSecretRegistryExtension - Secret Registry
 
       # Used by Connect's REST layer to connect to MDS to verify tokens and authenticate clients
       CONNECT_CONFLUENT_METADATA_BOOTSTRAP_SERVER_URLS: http://broker:8092
