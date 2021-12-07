@@ -27,7 +27,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schemaregistry:8081
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -67,6 +67,7 @@ services:
       KSQL_LISTENERS: "http://0.0.0.0:8088"
       KSQL_BOOTSTRAP_SERVERS: "broker:9092"
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      COMPOSE_HTTP_TIMEOUT: 90
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
       KSQL_CONNECT_GROUP_ID: "ksql-connect-cluster"
@@ -94,7 +95,7 @@ services:
     tty: true
     
   elasticsearch:
-    image: elasticsearch:7.6.2
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.0
     hostname: elasticsearch
     container_name: elasticsearch
     ports:
@@ -104,7 +105,7 @@ services:
       discovery.type: single-node
       
   kibana:
-    image: docker.elastic.co/kibana/kibana-oss:7.6.0
+    image: docker.elastic.co/kibana/kibana-oss:7.10.0
     container_name: kibana
     depends_on:
       - elasticsearch
