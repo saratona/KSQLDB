@@ -8,6 +8,10 @@ download zip for connector json schema trasformation:
 
 https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema
 
+download zip connector Confluent Connect Replicator:
+
+https://www.confluent.io/hub/confluentinc/kafka-connect-replicator
+
 metterli nella cartella connectors entrambi in una cartella
 
 
