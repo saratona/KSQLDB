@@ -6,24 +6,9 @@ Using Kafka Connect, a Kafka source connector [Server Sent Events Source Connect
 This demo uses ksqlDB and a Kafka Streams application for data processing. Then a Kafka sink connector [ElasticSearch Sink Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch) (kafka-connect-elasticsearch) streams the data out of Kafka, and the data is materialized into Elasticsearch for analysis by Kibana. Confluent Replicator is also copying messages from a topic to another topic in the same cluster. All data is using Confluent Schema Registry and Avro.
 
 
-download zip for connector wikimedia sse:
-
-https://www.confluent.io/hub/cjmatta/kafka-connect-sse
-
-download zip for connector json schema trasformation:
-
-https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema
-
-download zip connector Confluent Connect Replicator:
-
-https://www.confluent.io/hub/confluentinc/kafka-connect-replicator
-
-metterli nella cartella connectors entrambi in una cartella
-
-
 per startare tutti i docker del docker-compose.yml:
 
-    docker-compose up
+    docker-compose up -d
     
 Create the connector between Wikimedia and Kafka topic 'wikipedia.parsed':
 
