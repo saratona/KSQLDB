@@ -62,7 +62,8 @@ Create the connector between Wikimedia and Kafka topic 'wikipedia.parsed':
         "tasks.max": "1"
     );
 
-    
+In this way the source connector kafka-connect-sse streams the server-sent events (SSE) from https://stream.wikimedia.org/v2/stream/recentchange and a custom connect transform kafka-connect-json-schema extracts the JSON from these messages and then are written to the cluster.
+
 runnare docker ksqldb CLI:
 
     docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
