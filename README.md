@@ -11,33 +11,19 @@ This demo uses ksqlDB and a Kafka Streams application for data processing. Then 
 In the folder ./connectors you find the Connectors described above, downloaded from Confluent Hub.
 
 Data pattern is as follows:
-32
 
-33
 +-------------------------------------+--------------------------------+---------------------------------------+
-34
 | Components                          | Consumes From                  | Produces To                           |
-35
 +=====================================+================================+=======================================+
-36
 | SSE source connector                | Wikipedia                      | ``wikipedia.parsed``                  |
-37
 +-------------------------------------+--------------------------------+---------------------------------------+
-38
 | ksqlDB                              | ``wikipedia.parsed``           | ksqlDB streams and tables             |
-39
 +-------------------------------------+--------------------------------+---------------------------------------+
-40
 | Kafka Streams application           | ``wikipedia.parsed``           | ``wikipedia.parsed.count-by-domain``  |
-41
 +-------------------------------------+--------------------------------+---------------------------------------+
-42
 | Confluent Replicator                | ``wikipedia.parsed``           | ``wikipedia.parsed.replica``          |
-43
 +-------------------------------------+--------------------------------+---------------------------------------+
-44
 | Elasticsearch sink connector        | ``WIKIPEDIABOT`` (from ksqlDB) | Elasticsearch/Kibana                  |
-45
 +-------------------------------------+--------------------------------+---------------------------------------+
 
 
