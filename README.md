@@ -13,17 +13,17 @@ In the folder ./connectors you find the Connectors described above, downloaded f
 Data pattern is as follows:
 
 +-------------------------------------+--------------------------------+---------------------------------------+
-| Components                          | Consumes From                  | Produces To                           |
+| Components                          | Consumes From                  | Produces To                           
 +=====================================+================================+=======================================+
-| SSE source connector                | Wikipedia                      | ``wikipedia.parsed``                  |
+| SSE source connector                | Wikipedia                      | ``wikipedia.parsed``                  
 +-------------------------------------+--------------------------------+---------------------------------------+
-| ksqlDB                              | ``wikipedia.parsed``           | ksqlDB streams and tables             |
+| ksqlDB                              | ``wikipedia.parsed``           | ksqlDB streams and tables             
 +-------------------------------------+--------------------------------+---------------------------------------+
-| Kafka Streams application           | ``wikipedia.parsed``           | ``wikipedia.parsed.count-by-domain``  |
+| Kafka Streams application           | ``wikipedia.parsed``           | ``wikipedia.parsed.count-by-domain``  
 +-------------------------------------+--------------------------------+---------------------------------------+
-| Confluent Replicator                | ``wikipedia.parsed``           | ``wikipedia.parsed.replica``          |
+| Confluent Replicator                | ``wikipedia.parsed``           | ``wikipedia.parsed.replica``          
 +-------------------------------------+--------------------------------+---------------------------------------+
-| Elasticsearch sink connector        | ``WIKIPEDIABOT`` (from ksqlDB) | Elasticsearch/Kibana                  |
+| Elasticsearch sink connector        | ``WIKIPEDIABOT`` (from ksqlDB) | Elasticsearch/Kibana                  
 +-------------------------------------+--------------------------------+---------------------------------------+
 
 
