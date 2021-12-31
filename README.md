@@ -2,13 +2,43 @@ This demo builds a Kafka event streaming application using ksqlDB and Kafka Stre
 
 The use case is a Kafka event streaming application for real-time edits to real Wikipedia pages. Wikimedia Foundation has introduced the EventStreams service that allows anyone to subscribe to recent changes to Wikimedia data: edits happening to real wiki pages (e.g. #en.wikipedia, #en.wiktionary) in real time.
 
-Using Kafka Connect, a Kafka source connector [Server Sent Events Source Connector](https://www.confluent.io/hub/cjmatta/kafka-connect-sse) (kafka-connect-sse) streams raw messages from Wkimedia data, and a custom Kafka Connect transform [Kafka Connect JSON Schema Trasformations](https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema) (kafka-connect-json-schema) transforms these messages and then the messages are written to a Kafka cluster. 
-This demo uses ksqlDB and a Kafka Streams application for data processing. Then a Kafka sink connector [ElasticSearch Sink Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch) (kafka-connect-elasticsearch) streams the data out of Kafka, and the data is materialized into Elasticsearch for analysis by Kibana. [Confluent Kafka Replicator](https://www.confluent.io/hub/confluentinc/kafka-connect-replicator) (kafka-connect-replicator) is also copying messages from a topic to another topic in the same cluster. All data is using Confluent Schema Registry and Avro.
-
 
 The connectors
 
+Using Kafka Connect, a Kafka source connector [Server Sent Events Source Connector](https://www.confluent.io/hub/cjmatta/kafka-connect-sse) (kafka-connect-sse) streams raw messages from Wkimedia data, and a custom Kafka Connect transform [Kafka Connect JSON Schema Trasformations](https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema) (kafka-connect-json-schema) transforms these messages and then the messages are written to a Kafka cluster. 
+This demo uses ksqlDB and a Kafka Streams application for data processing. Then a Kafka sink connector [ElasticSearch Sink Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch) (kafka-connect-elasticsearch) streams the data out of Kafka, and the data is materialized into Elasticsearch for analysis by Kibana. [Confluent Kafka Replicator](https://www.confluent.io/hub/confluentinc/kafka-connect-replicator) (kafka-connect-replicator) is also copying messages from a topic to another topic in the same cluster. All data is using Confluent Schema Registry and Avro.
+
 In the folder ./connectors you find the Connectors described above, downloaded from Confluent Hub.
+
+Data pattern is as follows:
+32
+
+33
++-------------------------------------+--------------------------------+---------------------------------------+
+34
+| Components                          | Consumes From                  | Produces To                           |
+35
++=====================================+================================+=======================================+
+36
+| SSE source connector                | Wikipedia                      | ``wikipedia.parsed``                  |
+37
++-------------------------------------+--------------------------------+---------------------------------------+
+38
+| ksqlDB                              | ``wikipedia.parsed``           | ksqlDB streams and tables             |
+39
++-------------------------------------+--------------------------------+---------------------------------------+
+40
+| Kafka Streams application           | ``wikipedia.parsed``           | ``wikipedia.parsed.count-by-domain``  |
+41
++-------------------------------------+--------------------------------+---------------------------------------+
+42
+| Confluent Replicator                | ``wikipedia.parsed``           | ``wikipedia.parsed.replica``          |
+43
++-------------------------------------+--------------------------------+---------------------------------------+
+44
+| Elasticsearch sink connector        | ``WIKIPEDIABOT`` (from ksqlDB) | Elasticsearch/Kibana                  |
+45
++-------------------------------------+--------------------------------+---------------------------------------+
 
 
 The docker-compose file
