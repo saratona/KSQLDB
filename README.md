@@ -34,6 +34,9 @@ The     docker-compose.yml  file defines the services to launch:
 
 paste here
 
+Note that we have two brokers: Kafka1 and Kafka2. Topics are partitioned, meaning a topic is spread over a number of "buckets" located on the two Kafka brokers. This distributed placement of the data is very important for scalability because it allows client applications to both read and write the data from/to two brokers at the same time.
+To make the data fault-tolerant and highly-available, every topic is replicated so that there are always two brokers that have a copy of the data just in case things go wrong, you want to do maintenance on the brokers, and so on. 
+
 
 Bring up the entire stack by running:
 
@@ -41,13 +44,7 @@ Bring up the entire stack by running:
     
 Create the connector between Wikimedia and Kafka topic 'wikipedia.parsed':
 
-    #!/bin/bash
-
-    HEADER="Content-Type: application/json"
-    DATA=$( cat << EOF
-    {
-      "name": "wikipedia-sse",
-      "config": {
+    CREATE SOURCE CONNECTOR wikipedia-sse WITH (
         "connector.class": "com.github.cjmatta.kafka.connect.sse.ServerSentEventsSourceConnector",
         "sse.uri": "https://stream.wikimedia.org/v2/stream/recentchange",
         "topic": "wikipedia.parsed",
@@ -63,10 +60,7 @@ Create the connector between Wikimedia and Kafka topic 'wikipedia.parsed':
         "value.converter": "io.confluent.connect.avro.AvroConverter",
         "value.converter.schema.registry.url": "http://schema-registry:8081",
         "tasks.max": "1"
-      }
-    }
-    EOF
-    )
+    );
 
     
 runnare docker ksqldb CLI:
