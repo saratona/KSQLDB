@@ -64,11 +64,12 @@ Create the connector between Wikimedia and Kafka topic 'wikipedia.parsed':
 
 In this way the source connector kafka-connect-sse streams the server-sent events (SSE) from https://stream.wikimedia.org/v2/stream/recentchange and a custom connect transform kafka-connect-json-schema extracts the JSON from these messages and then are written to the cluster.
 
-runnare docker ksqldb CLI:
+
+Run ksqlDB CLI to get to the ksqlDB CLI prompt:
 
     docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
     
-Run this query in ksql:
+Create the stream of data
 
     CREATE STREAM wikipedia WITH (kafka_topic='wikipedia.parsed', value_format='AVRO');
     
