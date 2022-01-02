@@ -36,6 +36,9 @@ paste here
 
 Note that we have two brokers: Kafka1 and Kafka2. Topics are partitioned, meaning a topic is spread over a number of "buckets" located on the two Kafka brokers. This distributed placement of the data is very important for scalability because it allows client applications to both read and write the data from/to two brokers at the same time.
 To make the data fault-tolerant and highly-available, every topic is replicated so that there are always two brokers that have a copy of the data just in case things go wrong, you want to do maintenance on the brokers, and so on. 
+Schema registry manages the event schemas and maps the schemas to topics, so that producers know which topics are accepting which schemas of events, and consumers know how to read and parse events in a topic.
+
+The connect worker’s embedded producer is configured to be idempotent, exactly-once in order semantics per partition (in the event of an error that causes a producer retry, the same message—which is still sent by the producer multiple times—will only be written to the Kafka log on the broker once).
 
 
 Bring up the entire stack by running:
@@ -63,22 +66,55 @@ Create the connector between Wikimedia and Kafka topic 'wikipedia.parsed':
     );
 
 In this way the source connector kafka-connect-sse streams the server-sent events (SSE) from https://stream.wikimedia.org/v2/stream/recentchange and a custom connect transform kafka-connect-json-schema extracts the JSON from these messages and then are written to the cluster.
+Note that the creation of the connector with the configuration parameter "topic" create the topic with name "wikipedia.parsed" because the configuration KAFKA_AUTO_CREATE_TOPICS_ENABLE of the broker Kafka1 is set to 'true'.
+In this way the topic is created with the schema correctly registered. To check it run this command and verify that wikipedia.parsed-value is in the list:
 
+    docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects
 
 Run ksqlDB CLI to get to the ksqlDB CLI prompt:
 
     docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
     
-Create the stream of data
+Create the stream of data from the source:
 
     CREATE STREAM wikipedia WITH (kafka_topic='wikipedia.parsed', value_format='AVRO');
     
-    CREATE STREAM wikipedianobot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = false AND length IS NOT NULL AND length->new IS              NOT NULL AND length->old IS NOT NULL;
+This demo creates two streams `WIKIPEDIANOBOT` and `WIKIPEDIABOT` which respectively filter for bot=falase and bot=true that suggests if the change at the wikipedia page was made by a bot or not.
+
+    CREATE STREAM wikipedianobot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = false AND length IS NOT NULL AND length->new IS NOT NULL AND length->old IS NOT NULL;
     
     CREATE STREAM wikipediabot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = true AND length IS NOT NULL AND length->new IS NOT NULL AND length->old IS NOT NULL;
-    
+ 
+Created also a table with a tumbling window which groups and count the changes for users:
+
     CREATE TABLE wikipedia_count_gt_1 WITH (key_format='JSON') AS SELECT user, meta->uri AS URI, count(*) AS COUNT FROM wikipedia WINDOW TUMBLING (size 300 second) WHERE meta->domain = 'commons.wikimedia.org' GROUP BY user, meta->uri HAVING count(*) > 1;
+  
+
+To view the existing ksqlDB streams type `SHOW STREAMS;`
+
+To describe the schema (fields or columns) of an existing ksqlDB stream, for istance WIKIPEDIA type `DESCRIBE WIKIPEDIA;`
+
+View the existing tables typing `SHOW TABLES;`
+
+View the existing ksqlDB queries, which are continuously running:
+
+    `SHOW QUERIES;`
     
+You can view messages from different ksqlDB streams and tables. For instance the following query will show results for newly arriving data:
+
+    select * from WIKIPEDIA EMIT CHANGES;
+
+Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB server properties; check these values with the docker-compose.yml file.
+
+
+
+
+VEDERE PUNTO 11 DI KSQL
+ 
+ 
+ 
+ 
+ 
 Now we want to create the connector with Kibana/Elasticsearch and create the index pattern:
 
 Run the 'set_elasticsearch_mapping_bot.sh' file and 'set_elasticsearch_mapping_count.sh' in the folder dashboard.
@@ -108,6 +144,8 @@ Create the connector:
     EOF
     )
     
+dopo la creazione dei connettori vedere la lista dei connettori
+
 Create the dashboards to visualize the data on Kibana, running the file 'configure_kibana_dashboard.sh' in the folder dashboard.
 
 
