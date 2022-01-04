@@ -1,3 +1,6 @@
+# ksqlDB Tutorial
+## Wikipedia changes analysis
+
 This demo builds a Kafka event streaming application using ksqlDB and Kafka Streams for stream processing. Follow the accompanying guided tutorial that steps through the demo so that you can learn how it all works together.
 
 The use case is a Kafka event streaming application for real-time edits to real Wikipedia pages. Wikimedia Foundation has introduced the EventStreams service that allows anyone to subscribe to recent changes to Wikimedia data: edits happening to real wiki pages (e.g. #en.wikipedia, #en.wiktionary) in real time.
@@ -90,9 +93,7 @@ To describe the schema (fields or columns) of an existing ksqlDB stream, for ist
 
 View the existing tables typing `SHOW TABLES;`
 
-View the existing ksqlDB queries, which are continuously running:
-
-    `SHOW QUERIES;`
+View the existing ksqlDB queries, which are continuously running: `SHOW QUERIES;`
     
 You can view messages from different ksqlDB streams and tables. For instance the following query will show results for newly arriving data:
 
@@ -104,8 +105,12 @@ Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB serve
 
 
 VEDERE PUNTO 11 DI KSQL
+
+consumers?
  
- 
+Replication
+
+Confluent Replicator copies data from a source Kafka cluster to a destination Kafka cluster. The source and destination clusters are typically different clusters, but in this demo, Replicator is doing intra-cluster replication, i.e., the source and destination Kafka clusters are the same
  
  
  
