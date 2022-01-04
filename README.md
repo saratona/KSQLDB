@@ -114,8 +114,42 @@ Replication is the process of having multiple copies of the data for the sole pu
 In Kafka, replication happens at the partition granularity i.e. copies of the partition are maintained at multiple broker instances using the partition’s write-ahead log. Replication factor defines the number of copies of the partition that needs to be kept; in this demo is set to 2.
 
 Confluent Replicator copies data from a source Kafka cluster to a destination Kafka cluster. The source and destination clusters are typically different clusters, but in this demo, Replicator is doing intra-cluster replication, i.e., the source and destination Kafka clusters are the same.
+Replicator is a Kafka Connect source connector and has a corresponding consumer group `connect-replicator`. To create the connector run this:
+    
+    CREATE SOURCE CONNECTOR replicate-topic WITH (
+        "connector.class": "io.confluent.connect.replicator.ReplicatorSourceConnector",
+        "topic.whitelist": "wikipedia.parsed",
+        "topic.rename.format": "\${topic}.replica",
+        "key.converter": "io.confluent.connect.replicator.util.ByteArrayConverter",
+        "value.converter": "io.confluent.connect.replicator.util.ByteArrayConverter",
 
- 
+        "dest.kafka.bootstrap.servers": "kafka1:9092",
+
+        "confluent.topic.replication.factor": 1,
+        "src.kafka.bootstrap.servers": "kafka1:9092",
+
+        "src.consumer.interceptor.classes": "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor",
+        "src.consumer.confluent.monitoring.interceptor.bootstrap.servers": "kafka1:9092",
+
+        "src.consumer.group.id": "connect-replicator",
+
+        "src.kafka.timestamps.producer.interceptor.classes": "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor",
+        "src.kafka.timestamps.producer.confluent.monitoring.interceptor.bootstrap.servers": "kafka1:9092",
+
+        "offset.timestamps.commit": "false",
+        "tasks.max": "1",
+        "provenance.header.enable": "false"
+    ); 
+    
+In this way it is created a new topic `wikipedia.parsed.replica`. Register the same schema for the replicated topic wikipedia.parsed.replica as was created for the original topic wikipedia.parsed:
+
+command
+
+In this case the replicated topic will register with the same schema ID as the original topic. Verify wikipedia.parsed.replica topic is populated and schema is registered:
+
+    docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects
+    
+checking if wikipedia.parsed.replica-value is in the list.
  
 Now we want to create the connector with Kibana/Elasticsearch and create the index pattern:
 
