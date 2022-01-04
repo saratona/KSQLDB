@@ -67,6 +67,10 @@ Note that the creation of the connector with the configuration parameter "topic"
 In this way the topic is created with the schema correctly registered. To check it run this command and verify that wikipedia.parsed-value is in the list:
 
     docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects
+    
+Describe the topic, which is the topic that the kafka-connect-sse source connector is writing to. Notice that it also has enabled Schema Validation:
+
+    docker-compose exec kafka1 kafka-topics --describe --topic wikipedia.parsed --bootstrap-server kafka1:9092
 
 Run ksqlDB CLI to get to the ksqlDB CLI prompt:
 
@@ -145,16 +149,36 @@ In this way it is created a new topic `wikipedia.parsed.replica`. Register the s
 
     SCHEMA=$docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects/wikipedia.parsed-value/versions/latest | jq .schema)
     
-        docker-compose exec schema-registry curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data "{\"schema\": $SCHEMA}" http://schema-registry:8081/subjects/wikipedia.parsed.replica-value/versions
+    docker-compose exec schema-registry curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data "{\"schema\": $SCHEMA}" http://schema-registry:8081/subjects/wikipedia.parsed.replica-value/versions
         
-    (se non va usa test.sh)
+    (se non va -copia risultato del prima comando al posto di $SCHEMA -usa test.sh)
 
 In this case the replicated topic will register with the same schema ID as the original topic. Verify wikipedia.parsed.replica topic is populated and schema is registered:
 
     docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects
     
 checking if wikipedia.parsed.replica-value is in the list.
- 
+
+Describe the topic just created, which is the topic that Replicator has replicated from wikipedia.parsed:
+
+    docker-compose exec kafka1 kafka-topics --describe --topic wikipedia.parsed.replica --bootstrap-server kafka1:9092
+    
+## Failed Broker
+
+To simulate a failed broker, stop the Docker container running one of the two Kafka brokers.
+Stop the Docker container running Kafka broker 2:
+
+    docker-compose stop kafka2
+    
+This command will give you the list of the active brokers between brackets:
+./bin/zookeeper-shell.sh localhost:2181 ls /brokers/ids
+
+or /usr/local/bin/zookeeper-shell localhost:2181, ls /brokers/ids
+
+docker-compose start kafka2
+
+## Monitoring
+
 Now we want to create the connector with Kibana/Elasticsearch and create the index pattern:
 
 Run the 'set_elasticsearch_mapping_bot.sh' file and 'set_elasticsearch_mapping_count.sh' in the folder dashboard.
