@@ -143,7 +143,11 @@ Replicator is a Kafka Connect source connector and has a corresponding consumer 
     
 In this way it is created a new topic `wikipedia.parsed.replica`. Register the same schema for the replicated topic wikipedia.parsed.replica as was created for the original topic wikipedia.parsed:
 
-command
+    SCHEMA=$docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects/wikipedia.parsed-value/versions/latest | jq .schema)
+    
+        docker-compose exec schema-registry curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data "{\"schema\": $SCHEMA}" http://schema-registry:8081/subjects/wikipedia.parsed.replica-value/versions
+        
+    (se non va usa test.sh)
 
 In this case the replicated topic will register with the same schema ID as the original topic. Verify wikipedia.parsed.replica topic is populated and schema is registered:
 
