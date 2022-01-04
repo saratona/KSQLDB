@@ -8,7 +8,10 @@ The use case is a Kafka event streaming application for real-time edits to real 
 
 ## The connectors
 
-Using Kafka Connect, a Kafka source connector [Server Sent Events Source Connector](https://www.confluent.io/hub/cjmatta/kafka-connect-sse) (kafka-connect-sse) streams raw messages from Wkimedia data, and a custom Kafka Connect transform [Kafka Connect JSON Schema Trasformations](https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema) (kafka-connect-json-schema) transforms these messages and then the messages are written to a Kafka cluster. 
+Kafka Connect is an open source component of Apache Kafka® that simplifies loading and exporting data between Kafka and external systems. 
+Using ksqlDB, you can run any Kafka Connect connector by embedding it in ksqlDB's servers: ksqlDB can double as a Connect server and will run a Distributed Mode cluster co-located on the ksqlDB server instance.
+
+A Kafka source connector [Server Sent Events Source Connector](https://www.confluent.io/hub/cjmatta/kafka-connect-sse) (kafka-connect-sse) streams raw messages from Wkimedia data, a custom Kafka Connect transform [Kafka Connect JSON Schema Trasformations](https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema) (kafka-connect-json-schema) transforms these messages and then the messages are written to a Kafka cluster. 
 This demo uses ksqlDB and a Kafka Streams application for data processing. Then a Kafka sink connector [ElasticSearch Sink Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch) (kafka-connect-elasticsearch) streams the data out of Kafka, and the data is materialized into Elasticsearch for analysis by Kibana. [Confluent Kafka Replicator](https://www.confluent.io/hub/confluentinc/kafka-connect-replicator) (kafka-connect-replicator) is also copying messages from a topic to another topic in the same cluster. All data is using Confluent Schema Registry and Avro.
 
 In the folder ./connectors you find the Connectors described above, downloaded from Confluent Hub.
@@ -179,18 +182,12 @@ docker-compose start kafka2
 
 ## Monitoring
 
-Now we want to create the connector with Kibana/Elasticsearch and create the index pattern:
+Now that the ksqlD is up and the stream of data is correctly created, we want to visualize and do some analysis with Kibana/Elasticsearch.
 
 Run the 'set_elasticsearch_mapping_bot.sh' file and 'set_elasticsearch_mapping_count.sh' in the folder dashboard.
-Create the connector:
+Run the following connector to sink the topic:
 
-    #!/bin/bash
-
-    HEADER="Content-Type: application/json"
-    DATA=$( cat << EOF
-    {
-      "name": "elasticsearch-ksqldb",
-      "config": {
+    CREATE SINK CONNECTOR elasticsearch-ksqldb WITH (
         "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
         "consumer.interceptor.classes": "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor",
         "topics": "WIKIPEDIABOT",
@@ -202,30 +199,36 @@ Create the connector:
         "value.converter": "io.confluent.connect.avro.AvroConverter",
         "value.converter.schema.registry.url": "http://schema-registry:8081",
         "schema.ignore": true
+    );
 
-      }
-    }
-    EOF
-    )
-    
-dopo la creazione dei connettori vedere la lista dei connettori
+Check that the data arrived in the index at this location: ADD_LINK
 
 Create the dashboards to visualize the data on Kibana, running the file 'configure_kibana_dashboard.sh' in the folder dashboard.
 
+Go to ADD_LINK to visualize the created dashboards.
 
-    docker-compose exec connect curl -X POST -H "${HEADER}" --data "${DATA}" http://connect:8083/connectors || exit 1
+## Teardown
+
+To view the connectors created in this demo type:
+
+    SHOW | LIST CONNECTORS;
+    
+When you're done, tear down the stack by running:
+    
+    docker-compose down
+
+######################## utility
+
+rimuovere kafka connect
+
+
+    #docker-compose exec connect curl -X POST -H "${HEADER}" --data "${DATA}" http://connect:8083/connectors || exit 1
 
  
 #Add the custom query property earliest for the auto.offset.reset parameter. This instructs ksqlDB queries to read all available topic data from the beginning. This configuration is used for each subsequent query:
 
      SET 'auto.offset.reset'='earliest';
-    
-creare connettore SSE tra Wikimedia e il topic di Kafka "wikipedia.parsed": ./submit_wikipedia_sse_config.sh
 
 create a topic: 
 
     docker-compose exec broker kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic wikipedia.parsed
-    
- TODO: crearli tutti automatizzati con create-topics.sh e functions.sh
- 
- eseguire query sql in statements
