@@ -29,21 +29,259 @@ Data pattern is as follows:
 
 ## The docker-compose file
 
-The     docker-compose.yml  file defines the services to launch:
+The `docker-compose.yml` file defines the services to launch:
 
+    ---
+    version: '2'
 
-paste here
+    services:
+
+        zookeeper:
+            image: confluentinc/cp-zookeeper:7.0.1
+            hostname: zookeeper
+            container_name: zookeeper
+            ports:
+              - "2181:2181"
+            environment:
+              ZOOKEEPER_CLIENT_PORT: 2181
+              ZOOKEEPER_TICK_TIME: 2000
+              ZOOKEEPER_SERVER_CNXN_FACTORY: org.apache.zookeeper.server.NettyServerCnxnFactory
+
+        kafka1:
+            image: confluentinc/cp-kafka:7.0.1
+            hostname: kafka1
+            container_name: kafka1
+            depends_on:
+              - zookeeper
+            ports:
+              - "8092:8092"
+              - "9092:9092"
+              - "29092:29092"
+            environment:
+              KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+              KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
+
+              KAFKA_BROKER_ID: 1
+              KAFKA_BROKER_RACK: "r1"
+              KAFKA_JMX_PORT: 9991
+
+              KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+              KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+              KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:29092
+
+              KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+              KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+              KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+              #KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 2
+              #KAFKA_CONFLUENT_BALANCER_HEAL_BROKER_FAILURE_THRESHOLD_MS: 30000
+
+              KAFKA_DELETE_TOPIC_ENABLE: 'true'
+              KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+              KAFKA_DEFAULT_REPLICATION_FACTOR: 2
+
+              KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+            
+        kafka2:
+            image: confluentinc/cp-kafka:7.0.1
+            hostname: kafka2
+            container_name: kafka2
+            depends_on:
+              - zookeeper
+            ports:
+              - "8091:8091"
+              - "9091:9091"
+              - "29091:29091"
+            environment:
+              KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+              KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
+
+              KAFKA_BROKER_ID: 2
+              KAFKA_BROKER_RACK: "r2"
+              KAFKA_JMX_PORT: 9992
+
+              KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+              KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+              KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9091,PLAINTEXT_HOST://localhost:29091
+
+              KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+              KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+              KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+              #KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 2
+              #KAFKA_CONFLUENT_BALANCER_HEAL_BROKER_FAILURE_THRESHOLD_MS: 30000
+
+              KAFKA_DELETE_TOPIC_ENABLE: 'true'
+              KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+              KAFKA_DEFAULT_REPLICATION_FACTOR: 2
+
+              KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+        schema-registry:
+            image: confluentinc/cp-schema-registry:7.0.1
+            hostname: schema-registry
+            container_name: schema-registry
+            depends_on:
+              - kafka1
+              - kafka2
+            ports:
+              - "8081:8081"
+            environment:
+              SCHEMA_REGISTRY_HOST_NAME: schema-registry
+              #SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
+              SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9091
+
+              SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
+
+              SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
+              SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 2
+
+              SCHEMA_REGISTRY_DEBUG: 'true'
+              #SCHEMA_REGISTRY_CONFLUENT_METADATA_BOOTSTRAP_SERVER_URLS: "kafka1:9092,kafka2:9091"
+      
+        ksqldb-server:
+            image: confluentinc/ksqldb-server:latest
+            hostname: ksqldb-server
+            container_name: ksqldb-server
+            depends_on:
+              - kafka1
+              - kafka2
+              - connect
+            ports:
+              - "8088:8088"
+            volumes:
+              - "./connectors/:/usr/share/kafka/plugins/"
+              - "./scripts/helper:/tmp/helper"
+            environment:
+              KSQL_KSQL_SERVICE_ID: "ksql-cluster"
+              KSQL_KSQL_STREAMS_REPLICATION_FACTOR: 2
+              KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: 2
+
+              # For Demo purposes: improve resource utilization and avoid timeouts
+              KSQL_KSQL_STREAMS_NUM_STREAM_THREADS: 1
+
+              KSQL_PRODUCER_ENABLE_IDEMPOTENCE: 'true'
+
+              KSQL_LISTENERS: "http://0.0.0.0:8088"
+              KSQL_BOOTSTRAP_SERVERS: "kafka1:9092,kafka2:9091"
+              KSQL_HOST_NAME: ksqldb-server
+              KSQL_CACHE_MAX_BYTES_BUFFERING: 0
+
+              KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+              COMPOSE_HTTP_TIMEOUT: 90
+
+              KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/tmp/helper/log4j.properties"
+              KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 2
+              KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
+              KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
+
+              #KSQL_CONFLUENT_METADATA_BOOTSTRAP_SERVER_URLS: http://kafka1:9092,http://kafka2:9091
+
+        #      KSQL_CONNECT_GROUP_ID: "ksql-connect-cluster"
+        #      KSQL_CONNECT_BOOTSTRAP_SERVERS: "kafka1:9092,kafka:9091"
+        #      KSQL_CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+        #      KSQL_CONNECT_VALUE_CONVERTER: "io.confluent.connect.avro.AvroConverter"
+        #      KSQL_CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+        #      KSQL_CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+        #      KSQL_CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+        #      KSQL_CONNECT_CONFIG_STORAGE_TOPIC: "ksql-connect-configs"
+        #      KSQL_CONNECT_OFFSET_STORAGE_TOPIC: "ksql-connect-offsets"
+        #      KSQL_CONNECT_STATUS_STORAGE_TOPIC: "ksql-connect-statuses"
+        #      KSQL_CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 2
+        #      KSQL_CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 2
+        #      KSQL_CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 2
+        #      KSQL_CONNECT_PLUGIN_PATH: "/usr/share/kafka/plugins"
+
+        ksqldb-cli:
+            image: confluentinc/ksqldb-cli:latest
+            container_name: ksqldb-cli
+            depends_on:
+              - kafka1
+              - kafka2
+              - connect
+              - ksqldb-server
+            volumes:
+              - ./scripts/ksqlDB/statements.sql:/tmp/statements.sql
+            entrypoint: /bin/sh
+            tty: true
+
+        elasticsearch:
+            image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.0
+            hostname: elasticsearch
+            container_name: elasticsearch
+            ports:
+              - "9200:9200"
+              - "9300:9300"
+            environment:
+              discovery.type: single-node
+              ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+              cluster.name: "elasticsearch-cp-demo"
+
+        kibana:
+            image: docker.elastic.co/kibana/kibana-oss:7.10.0
+            container_name: kibana
+            depends_on:
+              - elasticsearch
+            ports:
+              - 5601:5601
+            environment:
+              NEWSFEED_ENABLED: 'false'
+              TELEMETRY_OPTIN: 'false'
+              TELEMETRY_ENABLED: 'false'
+              SERVER_MAXPAYLOADBYTES: 4194304
+              KIBANA_AUTOCOMPLETETIMEOUT: 3000
+              KIBANA_AUTOCOMPLETETERMINATEAFTER: 2500000
+
+        connect:
+            image: confluentinc/cp-kafka-connect:latest
+            container_name: connect
+            depends_on:
+              - kafka1
+              - kafka2
+              - schema-registry
+            ports:
+              - 8083:8083
+            volumes:
+              - "./connectors/:/usr/share/confluent-hub-components"
+            environment:
+              CONNECT_BOOTSTRAP_SERVERS: "kafka1:9092,kafka2:9091"
+              CONNECT_REST_PORT: 8083
+              CONNECT_LISTENERS: http://0.0.0.0:8083
+              CONNECT_GROUP_ID: "connect-cluster"
+              CONNECT_PRODUCER_CLIENT_ID: "connect-worker-producer"
+              CONNECT_PRODUCER_ENABLE_IDEMPOTENCE: 'true'
+
+              CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
+              CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+              CONNECT_STATUS_STORAGE_TOPIC: connect-statuses
+
+              CONNECT_REPLICATION_FACTOR: 2
+              CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 2
+              CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 2
+              CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 2
+
+              CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+              CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+
+              CONNECT_REST_ADVERTISED_HOST_NAME: connect
+              CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+
+              # Reduce Connect memory utilization
+              KAFKA_JVM_PERFORMANCE_OPTS: -server -XX:+UseG1GC -XX:GCTimeRatio=1
+                          -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20
+                          -XX:MaxGCPauseMillis=10000 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent
+                          -XX:MaxInlineLevel=15 -Djava.awt.headless=true
+ 
 
 Note that we have two brokers: Kafka1 and Kafka2. Topics are partitioned, meaning a topic is spread over a number of "buckets" located on the two Kafka brokers. This distributed placement of the data is very important for scalability because it allows client applications to both read and write the data from/to two brokers at the same time.
 To make the data fault-tolerant and highly-available, every topic is replicated so that there are always two brokers that have a copy of the data just in case things go wrong, you want to do maintenance on the brokers, and so on. 
 Schema registry manages the event schemas and maps the schemas to topics, so that producers know which topics are accepting which schemas of events, and consumers know how to read and parse events in a topic.
 
-The connect worker’s embedded producer is configured to be idempotent, exactly-once in order semantics per partition (in the event of an error that causes a producer retry, the same message—which is still sent by the producer multiple times—will only be written to the Kafka log on the broker once).
+    #The connect worker’s embedded producer is configured to be idempotent, exactly-once in order semantics per partition (in the event of an error that causes a producer retry, the same message—which is still sent by the producer multiple times—will only be written to the Kafka log on the broker once).
 
 
 Bring up the entire stack by running:
 
     docker-compose up -d
+    
+## Kafka and ksqlDB
     
 Create the connector between Wikimedia and Kafka topic 'wikipedia.parsed':
 
@@ -108,12 +346,9 @@ You can view messages from different ksqlDB streams and tables. For instance the
 
 Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB server properties; check these values with the docker-compose.yml file.
 
+!!VEDERE PUNTO 11 DI KSQL
 
-
-
-VEDERE PUNTO 11 DI KSQL
-
-consumers?
+!!consumers?
  
 ## Replication
 
@@ -206,6 +441,8 @@ Check that the data arrived in the index at this location: ADD_LINK
 Create the dashboards to visualize the data on Kibana, running the file 'configure_kibana_dashboard.sh' in the folder dashboard.
 
 Go to ADD_LINK to visualize the created dashboards.
+
+foto della dashboard!
 
 ## Teardown
 
