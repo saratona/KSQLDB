@@ -13,7 +13,7 @@ In the folder ./connectors you find the Connectors described above, downloaded f
 Data pattern is as follows:
 
 | Components                          | Consumes From                  | Produces To                           |
-|=====================================|================================|=======================================|
+|-------------------------------------|--------------------------------|-------------------------------------|
 | SSE source connector                | Wikipedia                      | ``wikipedia.parsed``                  |
 | ksqlDB                              | ``wikipedia.parsed``           | ksqlDB streams and tables             |
 | Kafka Streams application           | ``wikipedia.parsed``           | ``wikipedia.parsed.count-by-domain``  |
