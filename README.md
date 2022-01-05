@@ -285,8 +285,8 @@ Bring up the entire stack by running:
     
 Create the connector between Wikimedia and Kafka topic 'wikipedia.parsed':
 
-    CREATE SOURCE CONNECTOR wikipedia-sse WITH ( \
-        "connector.class": "com.github.cjmatta.kafka.connect.sse.ServerSentEventsSourceConnector", \
+    CREATE SOURCE CONNECTOR wikipedia-sse WITH \
+        ("connector.class": "com.github.cjmatta.kafka.connect.sse.ServerSentEventsSourceConnector", \
         "sse.uri": "https://stream.wikimedia.org/v2/stream/recentchange", \
         "topic": "wikipedia.parsed", \
         "transforms": "extractData, parseJSON", \
