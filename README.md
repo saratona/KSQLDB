@@ -300,7 +300,7 @@ Create the connector between Wikimedia and Kafka topic 'wikipedia.parsed':
         "producer.interceptor.classes": "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor", \
         "value.converter": "io.confluent.connect.avro.AvroConverter", \
         "value.converter.schema.registry.url": "http://schema-registry:8081", \
-        "tasks.max": "1" \
+        "tasks.max": "1"
     );
 
 In this way the source connector kafka-connect-sse streams the server-sent events (SSE) from https://stream.wikimedia.org/v2/stream/recentchange and a custom connect transform kafka-connect-json-schema extracts the JSON from these messages and then are written to the cluster.
