@@ -285,22 +285,22 @@ Bring up the entire stack by running:
     
 Create the connector between Wikimedia and Kafka topic 'wikipedia.parsed':
 
-    CREATE SOURCE CONNECTOR wikipedia-sse WITH (
-        "connector.class": "com.github.cjmatta.kafka.connect.sse.ServerSentEventsSourceConnector",
-        "sse.uri": "https://stream.wikimedia.org/v2/stream/recentchange",
-        "topic": "wikipedia.parsed",
-        "transforms": "extractData, parseJSON",
-        "transforms.extractData.type": "org.apache.kafka.connect.transforms.ExtractField\$Value",
-        "transforms.extractData.field": "data",
-        "transforms.parseJSON.type": "com.github.jcustenborder.kafka.connect.json.FromJson\$Value",
-        "transforms.parseJSON.json.exclude.locations": "#/properties/log_params,#/properties/\$schema,#/\$schema",
-        "transforms.parseJSON.json.schema.location": "Url",
-        "transforms.parseJSON.json.schema.url": "https://raw.githubusercontent.com/wikimedia/mediawiki-event-schemas/master/jsonschema/mediawiki/recentchange/1.0.0.json",
-        "transforms.parseJSON.json.schema.validation.enabled": "false",
-        "producer.interceptor.classes": "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor",
-        "value.converter": "io.confluent.connect.avro.AvroConverter",
-        "value.converter.schema.registry.url": "http://schema-registry:8081",
-        "tasks.max": "1"
+    CREATE SOURCE CONNECTOR wikipedia-sse WITH ( \
+        "connector.class": "com.github.cjmatta.kafka.connect.sse.ServerSentEventsSourceConnector", \
+        "sse.uri": "https://stream.wikimedia.org/v2/stream/recentchange", \
+        "topic": "wikipedia.parsed", \
+        "transforms": "extractData, parseJSON", \
+        "transforms.extractData.type": "org.apache.kafka.connect.transforms.ExtractField\$Value", \
+        "transforms.extractData.field": "data", \
+        "transforms.parseJSON.type": "com.github.jcustenborder.kafka.connect.json.FromJson\$Value", \
+        "transforms.parseJSON.json.exclude.locations": "#/properties/log_params,#/properties/\$schema,#/\$schema", \
+        "transforms.parseJSON.json.schema.location": "Url", \
+        "transforms.parseJSON.json.schema.url": "https://raw.githubusercontent.com/wikimedia/mediawiki-event-schemas/master/jsonschema/mediawiki/recentchange/1.0.0.json", \
+        "transforms.parseJSON.json.schema.validation.enabled": "false", \
+        "producer.interceptor.classes": "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor", \
+        "value.converter": "io.confluent.connect.avro.AvroConverter", \
+        "value.converter.schema.registry.url": "http://schema-registry:8081", \
+        "tasks.max": "1" \
     );
 
 In this way the source connector kafka-connect-sse streams the server-sent events (SSE) from https://stream.wikimedia.org/v2/stream/recentchange and a custom connect transform kafka-connect-json-schema extracts the JSON from these messages and then are written to the cluster.
