@@ -324,7 +324,7 @@ Describe the topic, which is the topic that the kafka-connect-sse source connect
 
     docker-compose exec kafka1 kafka-topics --describe --topic wikipedia.parsed --bootstrap-server kafka1:9092
     
-Create the stream of data from the source:
+Enter again in the ksqlDB CLI prompt and create the stream of data from the source:
 
     CREATE STREAM wikipedia WITH (kafka_topic='wikipedia.parsed', value_format='AVRO');
     
@@ -350,6 +350,8 @@ View the existing ksqlDB queries, which are continuously running: `SHOW QUERIES;
 You can view messages from different ksqlDB streams and tables. For instance the following query will show results for newly arriving data:
 
     select * from WIKIPEDIA EMIT CHANGES;
+    
+Press Ctrl+C for interrupt the streams of data.
 
 Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB server properties; check these values with the docker-compose.yml file.
 
