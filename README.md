@@ -317,7 +317,8 @@ Note that if the configuration parameter of the Broker KAFKA_AUTO_CREATE_TOPICS_
 The creation of the connector with 'topic' = 'wikipedia.parsed' guarantees that the topic value is using a Schema registered with Schema Registry. To check it run this command that shows the list of topics correctly registered with Schema Registry (after exiting from ksql with command `exit`):
 
     docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects
-verify that wikipedia.parsed-value is in the list:
+verify that wikipedia.parsed-value is in the list.
+
     
 Describe the topic, which is the topic that the kafka-connect-sse source connector is writing to.
 
