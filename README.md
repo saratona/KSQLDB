@@ -283,13 +283,13 @@ Bring up the entire stack by running:
     
 ## Kafka and ksqlDB
     
-Run ksqlDB CLI to get to the ksqlDB CLI prompt:
-
-    docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
-
 Create the topic `wikipedia.parsed`:
 
     docker-compose exec kafka1 kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 2 --partitions 2 --topic wikipedia.parsed
+
+Run ksqlDB CLI to get to the ksqlDB CLI prompt:
+
+    docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
 
 Create the connector between Wikimedia and Kafka topic `wikipedia.parsed` :
 
@@ -314,11 +314,12 @@ Create the connector between Wikimedia and Kafka topic `wikipedia.parsed` :
 In this way the source connector kafka-connect-sse streams the server-sent events (SSE) from https://stream.wikimedia.org/v2/stream/recentchange and a custom connect transform kafka-connect-json-schema extracts the JSON from these messages and then are written to the cluster.
 Note that if the configuration parameter of the Broker KAFKA_AUTO_CREATE_TOPICS_ENABLE was set to 'true' the creation of the connector would imply the creation of the topic with name in the configuration parameter "topic". The parameter is set to false because the demo requires to set customed configurations in the creation of the topics. For example the default value of partitions is 1 when the auto-creation of the topic is on, but we want it to be equal to 2.
 
-The creation of the connector with 'topic' = 'wikipedia.parsed' guarantees that the topic value is using a Schema registered with Schema Registry . To check it run this command and verify that wikipedia.parsed-value is in the list:
+The creation of the connector with 'topic' = 'wikipedia.parsed' guarantees that the topic value is using a Schema registered with Schema Registry. To check it run this command that shows the list of topics correctly registered with Schema Registry (after exiting from ksql with command `exit`):
 
     docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects
+verify that wikipedia.parsed-value is in the list:
     
-Describe the topic, which is the topic that the kafka-connect-sse source connector is writing to. Notice that it also has enabled Schema Validation:
+Describe the topic, which is the topic that the kafka-connect-sse source connector is writing to.
 
     docker-compose exec kafka1 kafka-topics --describe --topic wikipedia.parsed --bootstrap-server kafka1:9092
     
