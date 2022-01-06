@@ -374,18 +374,18 @@ Replicator is a Kafka Connect source connector and has a corresponding consumer 
         'key.converter' = 'io.confluent.connect.replicator.util.ByteArrayConverter',
         'value.converter' = 'io.confluent.connect.replicator.util.ByteArrayConverter',
 
-        'dest.kafka.bootstrap.servers' = 'kafka1 : 9092',
+        'dest.kafka.bootstrap.servers' = 'kafka1:9092',
 
         'confluent.topic.replication.factor' = 1,
-        'src.kafka.bootstrap.servers' = 'kafka1 : 9092',
+        'src.kafka.bootstrap.servers' = 'kafka1:9092',
 
         'src.consumer.interceptor.classes' = 'io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor',
-        'src.consumer.confluent.monitoring.interceptor.bootstrap.servers' = 'kafka1 : 9092',
+        'src.consumer.confluent.monitoring.interceptor.bootstrap.servers' = 'kafka1:9092',
 
         'src.consumer.group.id' = 'connect-replicator',
 
         'src.kafka.timestamps.producer.interceptor.classes' = 'io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor',
-        'src.kafka.timestamps.producer.confluent.monitoring.interceptor.bootstrap.servers' = 'kafka1 : 9092',
+        'src.kafka.timestamps.producer.confluent.monitoring.interceptor.bootstrap.servers' = 'kafka1:9092',
 
         'offset.timestamps.commit' = 'false',
         'tasks.max' = '1',
