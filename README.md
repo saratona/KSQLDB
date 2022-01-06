@@ -394,7 +394,7 @@ In this way it is created a new topic `wikipedia.parsed.replica`. Register the s
         
     (se non va -copia risultato del prima comando al posto di $SCHEMA -usa test.sh)
 
-In this case the replicated topic will register with the same schema ID as the original topic. Verify wikipedia.parsed.replica topic is populated and schema is registered:
+In this case the replicated topic will register with the same schema ID as the original topic. Verify wikipedia.parsed.replica topic is populated and schema is registered: #####verificare che non c'è prima del test.sh
 
     docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects
     
@@ -414,7 +414,7 @@ Stop the Docker container running Kafka broker 2:
 This command will give you the list of the active brokers between brackets:
 ./bin/zookeeper-shell.sh localhost:2181 ls /brokers/ids
 
-or /usr/local/bin/zookeeper-shell localhost:2181, ls /brokers/ids
+or /usr/local/bin/zookeeper-shell localhost:2181, ls /brokers/ids ###### trovare comando
 
 docker-compose start kafka2
 
