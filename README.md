@@ -426,17 +426,16 @@ Run the 'set_elasticsearch_mapping_bot.sh' file and 'set_elasticsearch_mapping_c
 Run the following connector to sink the topic:
 
     CREATE SINK CONNECTOR elasticsearch_ksqldb WITH (
-        'connector.class '  =  'io.confluent.connect.elasticsearch.ElasticsearchSinkConnector ',
-        'consumer.interceptor.classes '  =  'io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor ',
-        'topics '  =  'WIKIPEDIABOT ',
-        'topic.index.map '  =  'WIKIPEDIABOT:wikipediabot ',
-        'connection.url '  =  'http://elasticsearch:9200 ',
-        'type.name '  =  '_doc ',
-        'key.ignore '  = true,
-        'key.converter.schema.registry.url '  =  'http://schema-registry:8081 ',
-        'value.converter '  =  'io.confluent.connect.avro.AvroConverter ',
-        'value.converter.schema.registry.url '  =  'http://schema-registry:8081 ',
-        'schema.ignore '  = true
+        'connector.class' = 'io.confluent.connect.elasticsearch.ElasticsearchSinkConnector',
+        'topics' = 'WIKIPEDIABOT',
+        'topic.index.map' = 'WIKIPEDIABOT:wikipediabot',
+        'connection.url' = 'http://elasticsearch:9200',
+        'type.name' = '_doc',
+        'key.ignore' = true,
+        'key.converter.schema.registry.url' = 'http://schema-registry:8081',
+        'value.converter' = 'io.confluent.connect.avro.AvroConverter',
+        'value.converter.schema.registry.url' = 'http://schema-registry:8081',
+        'schema.ignore' = true
     );
 
 Check that the data arrived in the index at this location: ADD_LINK
