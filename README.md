@@ -440,6 +440,8 @@ Run the following connector to sink the topic:
 
 Check that the data arrived in the index at this location: [http://localhost:5601/app/discover#](http://localhost:5601/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m%2Fm,to:now))&_a=h@1353cf1)
 
+##check http://localhost:9200/_template/wikipediabot?pretty
+
 Create the dashboards to visualize the data on Kibana, running the file 'configure_kibana_dashboard.sh' in the folder dashboard.
 
 Go to [http://localhost:5601/app/dashboards#/view/Overview](http://localhost:5601/app/dashboards#/view/Overview?_g=h@ac5c3b7&_a=h@295d1b7) to visualize the created dashboards.
