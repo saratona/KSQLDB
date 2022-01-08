@@ -394,7 +394,7 @@ In this way it is created a new topic `wikipedia.parsed.replica`. Register the s
         
     (se non va -copia risultato del prima comando al posto di $SCHEMA -usa test.sh)
 
-In this case the replicated topic will register with the same schema ID as the original topic. Verify wikipedia.parsed.replica topic is populated and schema is registered: #####verificare che non c'è prima del test.sh
+In this case the replicated topic will register with the same schema ID as the original topic. Verify wikipedia.parsed.replica topic is populated and schema is registered:
 
     docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects
     
