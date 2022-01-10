@@ -14,7 +14,7 @@ Follow the accompanying guided tutorial, broken down step-by-step, to learn how 
 
 ## Schema registry
 
-![schemaregistry](https://github.com/saratona/KSQLDB/blob/main/images/schemaregistry-overview.png | height=20)
+![schemaregistry](https://github.com/saratona/KSQLDB/blob/main/images/schemaregistry-overview.png)
 Schema Registry is a standalone server process that runs on a machine external to the Kafka brokers. Its job is to maintain a database of all of the schemas that have been written into topics in the cluster for which it is responsible. That “database” is persisted in an internal Kafka topic and cached in the Schema Registry for low-latency access.
 
 All the applications and connectors used in this demo are configured to automatically read and write Avro-formatted data, leveraging the Schema Registry.
