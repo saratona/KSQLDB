@@ -18,7 +18,7 @@ In the world of information storage and retrieval, some systems are not Kafka. S
 Kafka Connect is an open source component of Apache Kafka® that simplifies loading and exporting data between Kafka and external systems. 
 Using ksqlDB, you can run any Kafka Connect connector by embedding it in ksqlDB's servers: ksqlDB can double as a Connect server and will run a Distributed Mode cluster co-located on the ksqlDB server instance.
 
-## The connectors
+### The connectors
 
 Wikimedia’s EventStreams publishes a continuous stream of real-time edits happening to real wiki pages. A Kafka source connector [Server Sent Events Source Connector](https://www.confluent.io/hub/cjmatta/kafka-connect-sse) (kafka-connect-sse) streams the server-sent events (SSE) from https://stream.wikimedia.org/v2/stream/recentchange, and a custom Connect transform [Kafka Connect JSON Schema Trasformations](https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema) (kafka-connect-json-schema) extracts the JSON from these messages and then are written to a Kafka cluster. This example uses ksqlDB and a Kafka Streams application for data processing. Then a Kafka sink connector [ElasticSearch Sink Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch) (kafka-connect-elasticsearch) streams the data out of Kafka and is materialized into Elasticsearch for analysis by Kibana. [Replicator](https://www.confluent.io/hub/confluentinc/kafka-connect-replicator) (kafka-connect-replicator) is also copying messages from a topic to another topic in the same cluster. All data is using Schema Registry and Avro.
 
