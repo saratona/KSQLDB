@@ -8,14 +8,19 @@ This demo builds a Kafka event streaming application using ksqlDB and Kafka Stre
 
 The use case is a Kafka event streaming application for real-time edits to real Wikipedia pages. Wikimedia Foundation has introduced the EventStreams service that allows anyone to subscribe to recent changes to Wikimedia data: edits happening to real wiki pages (e.g. #en.wikipedia, #en.wiktionary) in real time.
 
+Follow the accompanying guided tutorial, broken down step-by-step, to learn how Kafka works with Connect, Schema Registry and Replicator.
 
-## The connectors
+## Kafka Connect
 
+image
+
+In the world of information storage and retrieval, some systems are not Kafka. Sometimes you would like the data in those other systems to get into Kafka topics, and sometimes you would like data in Kafka topics to get into those systems. As Apache Kafka's integration API, this is exactly what Kafka Connect does.
 Kafka Connect is an open source component of Apache Kafka® that simplifies loading and exporting data between Kafka and external systems. 
 Using ksqlDB, you can run any Kafka Connect connector by embedding it in ksqlDB's servers: ksqlDB can double as a Connect server and will run a Distributed Mode cluster co-located on the ksqlDB server instance.
 
-A Kafka source connector [Server Sent Events Source Connector](https://www.confluent.io/hub/cjmatta/kafka-connect-sse) (kafka-connect-sse) streams raw messages from Wkimedia data, a custom Kafka Connect transform [Kafka Connect JSON Schema Trasformations](https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema) (kafka-connect-json-schema) transforms these messages and then the messages are written to a Kafka cluster. 
-This demo uses ksqlDB and a Kafka Streams application for data processing. Then a Kafka sink connector [ElasticSearch Sink Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch) (kafka-connect-elasticsearch) streams the data out of Kafka, and the data is materialized into Elasticsearch for analysis by Kibana. [Confluent Kafka Replicator](https://www.confluent.io/hub/confluentinc/kafka-connect-replicator) (kafka-connect-replicator) is also copying messages from a topic to another topic in the same cluster. All data is using Confluent Schema Registry and Avro.
+## The connectors
+
+Wikimedia’s EventStreams publishes a continuous stream of real-time edits happening to real wiki pages. A Kafka source connector [Server Sent Events Source Connector](https://www.confluent.io/hub/cjmatta/kafka-connect-sse) (kafka_connect_sse) streams the server-sent events (SSE) from https://stream.wikimedia.org/v2/stream/recentchange, and a custom Connect transform [Kafka Connect JSON Schema Trasformations](https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema) (kafka-connect-json-schema) extracts the JSON from these messages and then are written to a Kafka cluster. This example uses ksqlDB and a Kafka Streams application for data processing. Then a Kafka sink connector [ElasticSearch Sink Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch) (kafka-connect-elasticsearch) streams the data out of Kafka and is materialized into Elasticsearch for analysis by Kibana. [Replicator](https://www.confluent.io/hub/confluentinc/kafka-connect-replicator) (kafka-connect-replicator) is also copying messages from a topic to another topic in the same cluster. All data is using Schema Registry and Avro.
 
 In the folder ./connectors you find the Connectors described above, downloaded from Confluent Hub.
 
@@ -25,7 +30,6 @@ Data pattern is as follows:
 |-------------------------------------|--------------------------------|-------------------------------------|
 | SSE source connector                | Wikipedia                      | ``wikipedia.parsed``                  |
 | ksqlDB                              | ``wikipedia.parsed``           | ksqlDB streams and tables             |
-| Kafka Streams application           | ``wikipedia.parsed``           | ``wikipedia.parsed.count-by-domain``  |
 | Confluent Replicator                | ``wikipedia.parsed``           | ``wikipedia.parsed.replica``          |
 | Elasticsearch sink connector        | ``WIKIPEDIABOT`` (from ksqlDB) | Elasticsearch/Kibana                  |
 
