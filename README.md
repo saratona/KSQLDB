@@ -12,9 +12,7 @@ Follow the accompanying guided tutorial, broken down step-by-step, to learn how 
 
 ## Kafka Connect
 
-.. figure:: images/connect-overview.jpg
-18
-    :alt: image
+![connect](../img/connect-overview.png){: class="centered-img" style="width: 90%"}
 
 In the world of information storage and retrieval, some systems are not Kafka. Sometimes you would like the data in those other systems to get into Kafka topics, and sometimes you would like data in Kafka topics to get into those systems. As Apache Kafka's integration API, this is exactly what Kafka Connect does.
 Kafka Connect is an open source component of Apache Kafka® that simplifies loading and exporting data between Kafka and external systems. 
