@@ -2,7 +2,7 @@
 
 ## Overview
 
-ksqlDBis the streaming SQL engine for Kafka. It provides an easy-to-use yet powerful interactive SQL interface for stream processing on Kafka, without the need to write code in a programming language such as Java or Python. ksqlDB is scalable, elastic, fault-tolerant, and real-time. It supports a wide range of streaming operations, including data filtering, transformations, aggregations, joins, windowing, and sessionization.
+ksqlDBis the streaming SQL engine for Apache Kafka®. It provides an easy-to-use yet powerful interactive SQL interface for stream processing on Kafka, without the need to write code in a programming language such as Java or Python. ksqlDB is scalable, elastic, fault-tolerant, and real-time. It supports a wide range of streaming operations, including data filtering, transformations, aggregations, joins, windowing, and sessionization.
 
 This demo builds a Kafka event streaming application using ksqlDB and Kafka Streams for stream processing. Follow the accompanying guided tutorial that steps through the demo so that you can learn how it all works together.
 
@@ -23,6 +23,8 @@ Using ksqlDB, you can run any Kafka Connect connector by embedding it in ksqlDB'
 Wikimedia’s EventStreams publishes a continuous stream of real-time edits happening to real wiki pages. A Kafka source connector [Server Sent Events Source Connector](https://www.confluent.io/hub/cjmatta/kafka-connect-sse) (kafka-connect-sse) streams the server-sent events (SSE) from https://stream.wikimedia.org/v2/stream/recentchange, and a custom Connect transform [Kafka Connect JSON Schema Trasformations](https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema) (kafka-connect-json-schema) extracts the JSON from these messages and then are written to a Kafka cluster. This example uses ksqlDB and a Kafka Streams application for data processing. Then a Kafka sink connector [ElasticSearch Sink Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch) (kafka-connect-elasticsearch) streams the data out of Kafka and is materialized into Elasticsearch for analysis by Kibana. [Replicator](https://www.confluent.io/hub/confluentinc/kafka-connect-replicator) (kafka-connect-replicator) is also copying messages from a topic to another topic in the same cluster. All data is using Schema Registry and Avro.
 
 In the folder ./connectors you find the Connectors described above, downloaded from Confluent Hub.
+
+![kafka](https://github.com/saratona/KSQLDB/blob/main/images/kafka-overview.png)
 
 Data pattern is as follows:
 
