@@ -17,7 +17,11 @@ Follow the accompanying guided tutorial, broken down step-by-step, to learn how 
 ![schemaregistry](https://github.com/saratona/KSQLDB/blob/main/images/schemaregistry-overview.png)
 Schema Registry is a standalone server process that runs on a machine external to the Kafka brokers. Its job is to maintain a database of all of the schemas that have been written into topics in the cluster for which it is responsible. That “database” is persisted in an internal Kafka topic and cached in the Schema Registry for low-latency access.
 
-All the applications and connectors used in this demo are configured to automatically read and write Avro-formatted data, leveraging the Schema Registry .
+All the applications and connectors used in this demo are configured to automatically read and write Avro-formatted data, leveraging the Schema Registry.
+
+## Kafka Streams
+
+Kafka Streams is a Java API that gives you easy access to all of the computational primitives of stream processing: filtering, grouping, aggregating, joining, and more, keeping you from having to write framework code on top of the consumer API to do all those things. It also provides support for the potentially large amounts of state that result from stream processing computations.
 
 ## Kafka Connect
 
