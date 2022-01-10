@@ -10,7 +10,7 @@ This demo builds a Kafka event streaming application using ksqlDB and Kafka Stre
 
 The use case is a Kafka event streaming application for real-time edits to real Wikipedia pages. Wikimedia Foundation has introduced the EventStreams service that allows anyone to subscribe to recent changes to Wikimedia data: edits happening to real wiki pages (e.g. #en.wikipedia, #en.wiktionary) in real time.
 
-Follow the accompanying guided tutorial, broken down step-by-step, to learn how Kafka works with Schema Registry, Replicator/Kafka Streams and Connect.
+Follow the accompanying guided tutorial, broken down step-by-step, to learn how Kafka works with Schema Registry, Kafka Streams and Connect.
 
 ## Schema registry
 
@@ -248,22 +248,19 @@ services:
       KIBANA_AUTOCOMPLETETERMINATEAFTER: 2500000
 ```
 
-There are a few things to notice here: first of all we have two brokers: kafka1 and kafka2. Each broker hosts some set of partitions and handles incoming requests to write new events to those partitions or read events from them. Brokers also handle replication of partitions between each other. Indeed brokers and their underlying storage are susceptible to failure, so we need to copy partition data to other brokers to keep it safe.
-
-To make the data fault-tolerant and highly-available, every topic is replicated so that there are always two brokers that have a copy of the data just in case things go wrong, you want to do maintenance on the brokers, and so on. 
-Schema registry manages the event schemas and maps the schemas to topics, so that producers know which topics are accepting which schemas of events, and consumers know how to read and parse events in a topic.
+There are a few things to notice here: first of all we have two brokers: kafka1 and kafka2. Each broker hosts some set of partitions and handles incoming requests to write new events to those partitions or read events from them. Brokers also handle replication of partitions between each other. Indeed brokers and their underlying storage are susceptible to failure, so we need to copy partition data to other brokers to keep it safe. As you can see from the `docker-compose.yml` in this demo the replication factor is set to 2.
 
 Bring up the entire stack by running:
 
     docker-compose up -d
     
-## Kafka and ksqlDB
+## ksqlDB
     
 Create the topic `wikipedia.parsed`:
 
     docker-compose exec kafka1 kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 2 --partitions 2 --topic wikipedia.parsed
 
-Run ksqlDB CLI to get to the ksqlDB CLI prompt:
+In an other shell run ksqlDB CLI to get to the ksqlDB CLI prompt:
 
     docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
 
@@ -301,22 +298,21 @@ To check it run this command to view the Schema Registry subjects for topics tha
     
 verify that wikipedia.parsed-value is in the list.
 
-    
-Describe the topic, which is the topic that the kafka-connect-sse source connector is writing to.
+Describe the only topic that exists up to now, which is the topic that the kafka-connect-sse source connector is writing to.
 
     docker-compose exec kafka1 kafka-topics --describe --topic wikipedia.parsed --bootstrap-server kafka1:9092
     
-Enter again in the ksqlDB CLI prompt and create the stream of data from the source:
+From the ksqlDB CLI prompt create the stream of data from the source:
 
     CREATE STREAM wikipedia WITH (kafka_topic='wikipedia.parsed', value_format='AVRO');
     
-This demo creates two streams `WIKIPEDIANOBOT` and `WIKIPEDIABOT` which respectively filter for bot=falase and bot=true that suggests if the change at the wikipedia page was made by a bot or not.
+This demo creates other two streams: `WIKIPEDIANOBOT` and `WIKIPEDIABOT` which respectively filter for bot = falase and bot = true that suggests if the change at the Wikipedia page was made by a bot or not.
 
     CREATE STREAM wikipedianobot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = false AND length IS NOT NULL AND length->new IS NOT NULL AND length->old IS NOT NULL;
     
     CREATE STREAM wikipediabot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = true AND length IS NOT NULL AND length->new IS NOT NULL AND length->old IS NOT NULL;
  
-Created also a table with a tumbling window which groups and count the changes for users:
+Created also a table with a tumbling window which groups and count the changes made by every users (that made at least one modification):
 
     CREATE TABLE wikipedia_count_gt_1 WITH (key_format='JSON') AS SELECT user, meta->uri AS URI, count(*) AS COUNT FROM wikipedia WINDOW TUMBLING (size 300 second) WHERE meta->domain = 'commons.wikimedia.org' GROUP BY user, meta->uri HAVING count(*) > 1;
   
