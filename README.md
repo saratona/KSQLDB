@@ -40,7 +40,7 @@ Wikimedia’s EventStreams publishes a continuous stream of real-time edits happ
 
 In the folder ./connectors you find the Connectors described above, downloaded from Confluent Hub.
 
-Data pattern is as follows:
+### Data pattern
 
 | Components                          | Consumes From                  | Produces To                           |
 |-------------------------------------|--------------------------------|-------------------------------------|
@@ -248,13 +248,10 @@ services:
       KIBANA_AUTOCOMPLETETERMINATEAFTER: 2500000
 ```
 
-There are a few things to notice here: first of all we have two brokers: Kafka1 and Kafka2. 
-Topics are partitioned, meaning a topic is spread over a number of "buckets" located on the two Kafka brokers. This distributed placement of the data is very important for scalability because it allows client applications to both read and write the data from/to two brokers at the same time.
+There are a few things to notice here: first of all we have two brokers: kafka1 and kafka2. Each broker hosts some set of partitions and handles incoming requests to write new events to those partitions or read events from them. Brokers also handle replication of partitions between each other. Indeed brokers and their underlying storage are susceptible to failure, so we need to copy partition data to other brokers to keep it safe.
+
 To make the data fault-tolerant and highly-available, every topic is replicated so that there are always two brokers that have a copy of the data just in case things go wrong, you want to do maintenance on the brokers, and so on. 
 Schema registry manages the event schemas and maps the schemas to topics, so that producers know which topics are accepting which schemas of events, and consumers know how to read and parse events in a topic.
-
-    #The connect worker’s embedded producer is configured to be idempotent, exactly-once in order semantics per partition (in the event of an error that causes a producer retry, the same message—which is still sent by the producer multiple times—will only be written to the Kafka log on the broker once).
-
 
 Bring up the entire stack by running:
 
