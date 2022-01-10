@@ -1,5 +1,4 @@
-# ksqlDB Tutorial
-### Wikipedia changes analysis
+# ksqlDB Tutorial - Wikipedia changes analysis
 
 ## ksqlDB
 
