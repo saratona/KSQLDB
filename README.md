@@ -357,7 +357,20 @@ Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB serve
 
 !!VEDERE PUNTO 11 DI KSQL
 
-!!consumers?
+## Consumers
+
+Create:
+
+    docker exec zookeeper kafka-console-consumer --bootstrap-server kafka2:9091 --topic WIKIPEDIANOBOT --group listen-consumer
+Prova ad aggiungere --property schema.registry.url=http://schema-registry:8081 alla fine.
+
+Visualize the list of the consumers groups:
+
+    docker exec zookeeper kafka-consumer-groups --list --bootstrap-server kafka2:9091
+
+Visualize the list of the consumers in the consumer group listen-consumer:
+
+    docker exec zookeeper kafka-consumer-groups --bootstrap-server kafka2:9091 --describe --group listen-consumer
  
 ## Replication
 
