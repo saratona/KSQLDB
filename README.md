@@ -411,12 +411,13 @@ Stop the Docker container running Kafka broker 2:
 
     docker-compose stop kafka2
     
-This command will give you the list of the active brokers between brackets:
-./bin/zookeeper-shell.sh localhost:2181 ls /brokers/ids
+This command will give you the list of the IDs of the active brokers between brackets:
 
-or /usr/local/bin/zookeeper-shell localhost:2181, ls /brokers/ids ###### trovare comando
+    docker exec zookeeper zookeeper-shell localhost:2181 ls /brokers/ids
+    
+Note that there is only the ID 1 because broker 2 (kafka2) has been stopped. Restart the broker:
 
-docker-compose start kafka2
+    docker-compose start kafka2
 
 ## Monitoring
 
@@ -473,3 +474,7 @@ rimuovere kafka connect
 create a topic: 
 
     docker-compose exec kafka1 kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 2 --partitions 2 --topic wikipedia.parsed
+    
+list of consumers:
+
+    docker exec zookeeper kafka-consumer-groups --list --bootstrap-server kafka2:9091
