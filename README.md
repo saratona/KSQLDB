@@ -1,6 +1,6 @@
 # ksqlDB Tutorial - Wikipedia changes analysis
 
-## ksqlDB
+## Overview
 
 ksqlDBis the streaming SQL engine for Kafka. It provides an easy-to-use yet powerful interactive SQL interface for stream processing on Kafka, without the need to write code in a programming language such as Java or Python. ksqlDB is scalable, elastic, fault-tolerant, and real-time. It supports a wide range of streaming operations, including data filtering, transformations, aggregations, joins, windowing, and sessionization.
 
