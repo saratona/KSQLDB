@@ -10,7 +10,15 @@ This demo builds a Kafka event streaming application using ksqlDB and Kafka Stre
 
 The use case is a Kafka event streaming application for real-time edits to real Wikipedia pages. Wikimedia Foundation has introduced the EventStreams service that allows anyone to subscribe to recent changes to Wikimedia data: edits happening to real wiki pages (e.g. #en.wikipedia, #en.wiktionary) in real time.
 
-Follow the accompanying guided tutorial, broken down step-by-step, to learn how Kafka works with Connect, Schema Registry and Replicator.
+Follow the accompanying guided tutorial, broken down step-by-step, to learn how Kafka works with Schema Registry, Replicator/Kafka Streams and Connect.
+
+## Schema registry
+
+![schemaregistry](https://github.com/saratona/KSQLDB/blob/main/images/schemaregistry-overview.png)
+
+Schema Registry is a standalone server process that runs on a machine external to the Kafka brokers. Its job is to maintain a database of all of the schemas that have been written into topics in the cluster for which it is responsible. That “database” is persisted in an internal Kafka topic and cached in the Schema Registry for low-latency access.
+
+All the applications and connectors used in this demo are configured to automatically read and write Avro-formatted data, leveraging the Schema Registry .
 
 ## Kafka Connect
 
@@ -237,7 +245,8 @@ services:
       KIBANA_AUTOCOMPLETETERMINATEAFTER: 2500000
 ```
 
-Note that we have two brokers: Kafka1 and Kafka2. Topics are partitioned, meaning a topic is spread over a number of "buckets" located on the two Kafka brokers. This distributed placement of the data is very important for scalability because it allows client applications to both read and write the data from/to two brokers at the same time.
+There are a few things to notice here: first of all we have two brokers: Kafka1 and Kafka2. 
+Topics are partitioned, meaning a topic is spread over a number of "buckets" located on the two Kafka brokers. This distributed placement of the data is very important for scalability because it allows client applications to both read and write the data from/to two brokers at the same time.
 To make the data fault-tolerant and highly-available, every topic is replicated so that there are always two brokers that have a copy of the data just in case things go wrong, you want to do maintenance on the brokers, and so on. 
 Schema registry manages the event schemas and maps the schemas to topics, so that producers know which topics are accepting which schemas of events, and consumers know how to read and parse events in a topic.
 
