@@ -475,6 +475,8 @@ Check that the data arrived in the index at this location: [http://localhost:560
 
 Create the dashboards to visualize the data on Kibana, running the file 'configure_kibana_dashboard.sh' in the folder dashboard.
 
+    ./dashboard/configure_kibana_dashboard.sh
+
 Go to [http://localhost:5601/app/dashboards#/view/Overview](http://localhost:5601/app/dashboards#/view/Overview?_g=h@ac5c3b7&_a=h@295d1b7) to visualize the created dashboards.
 
 foto della dashboard!
