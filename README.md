@@ -350,7 +350,9 @@ Consumer lag is available on a per-consumer basis, including the embedded Connec
 
 Create an additional consumer to read from topic WIKIPEDIANOBOT:
 
-    docker exec schema-registry kafka-avro-console-consumer --bootrap-server kafka1:9092,kafka2:9091 --topic WIKIPEDIANOBOT --group listen-consumer
+    docker exec schema-registry kafka-avro-console-consumer --bootrap-server kafka1:9092,kafka2:9091 --topic WIKIPEDIANOBOT --group listen-consumer > /dev/null 2>&1 &
+    
+Running this command from the schema-registry docker the consumer will automatically register with Schema Registry.
 
 Visualize the list of the consumers groups:
 
