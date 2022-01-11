@@ -397,8 +397,10 @@ You have to register the same schema for the replicated topic as was created for
 
 In this file there are two commands:
 - the first saves the schema of the topic `wikipedia.parsed` in the variable SCHEMA:
+
 ```SCHEMA=$(docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects/wikipedia.parsed-value/versions/latest | jq .schema```
 - the second gives SCHEMA as schema of the topic `wikipedia.parsed.replica`:
+
 ```docker-compose exec schema-registry curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data "{\"schema\": $SCHEMA}" http://schema-registry:8081/subjects/wikipedia.parsed.replica-value/versions```
 
 Now verify wikipedia.parsed.replica topic is populated and schema is registered:
