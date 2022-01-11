@@ -313,7 +313,7 @@ This demo creates other two streams: `WIKIPEDIANOBOT` and `WIKIPEDIABOT` which r
 ```sql
 CREATE STREAM wikipedianobot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = false AND length IS NOT NULL AND length->new IS NOT NULL AND length->old IS NOT NULL;
     
-    CREATE STREAM wikipediabot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = true AND length IS NOT NULL AND length->new IS NOT NULL AND length->old IS NOT NULL;
+CREATE STREAM wikipediabot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = true AND length IS NOT NULL AND length->new IS NOT NULL AND length->old IS NOT NULL;
 ```
 
 Create also a table with a tumbling window which groups and count the changes made by every users (that made at least one modification):
@@ -322,12 +322,9 @@ Create also a table with a tumbling window which groups and count the changes ma
 CREATE TABLE wikipedia_count_gt_1 WITH (key_format='JSON') AS SELECT user, meta->uri AS URI, count(*) AS COUNT FROM wikipedia WINDOW TUMBLING (size 300 second) WHERE meta->domain = 'commons.wikimedia.org' GROUP BY user, meta->uri HAVING count(*) > 1;
 ```  
 
-To view the existing ksqlDB streams type 
-```sql
-SHOW STREAMS;
-```
+To view the existing ksqlDB streams type `SHOW STREAMS;`
 
-To describe the schema (fields or columns) of an existing ksqlDB stream, for istance WIKIPEDIA type ```sql DESCRIBE WIKIPEDIA;```
+To describe the schema (fields or columns) of an existing ksqlDB stream, for istance WIKIPEDIA type `DESCRIBE WIKIPEDIA;`
 
 View the existing tables typing `SHOW TABLES;`
 
@@ -335,13 +332,13 @@ View the existing ksqlDB queries, which are continuously running: `SHOW QUERIES;
     
 You can view messages from different ksqlDB streams and tables. For instance the following query will show results for newly arriving data:
 
-    select * from WIKIPEDIA EMIT CHANGES;
-    
+```sql
+select * from WIKIPEDIA EMIT CHANGES;
+```
+
 Press Ctrl+C for interrupt the streams of data.
 
-Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB server properties; check these values with the docker-compose.yml file.
-
-!!VEDERE PUNTO 11 DI KSQL
+Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB server properties; check these values with the `docker-compose.yml` file.
 
 ## Consumers
 
