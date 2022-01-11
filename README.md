@@ -44,7 +44,7 @@ In the folder ./connectors you find the Connectors described above, downloaded f
 |-------------------------------------|--------------------------------|-------------------------------------|
 | SSE source connector                | Wikipedia                      | ``wikipedia.parsed``                  |
 | ksqlDB                              | ``wikipedia.parsed``           | ksqlDB streams and tables             |
-| Confluent Replicator                | ``wikipedia.parsed``           | ``wikipedia.parsed.replica``          |
+| Replicator                | ``wikipedia.parsed``           | ``wikipedia.parsed.replica``          |
 | Elasticsearch sink connector        | ``WIKIPEDIABOT`` (from ksqlDB) | Elasticsearch/Kibana                  |
 
 In this demo are removed all the security references.
