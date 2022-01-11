@@ -475,7 +475,7 @@ Create the dashboards to visualize the data on Kibana, running the file 'configu
 
 Go to [http://localhost:5601/app/dashboards#/view/Overview](http://localhost:5601/app/dashboards#/view/Overview?_g=h@ac5c3b7&_a=h@295d1b7) to visualize the created dashboards.
 
-foto della dashboard!
+![kibana](https://github.com/saratona/KSQLDB/blob/main/images/kibana-dashboard.png)
 
 ## Teardown
 
