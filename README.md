@@ -350,9 +350,7 @@ Consumer lag is available on a per-consumer basis, including the embedded Connec
 
 Create an additional consumer to read from topic WIKIPEDIANOBOT:
 
-    docker exec zookeeper kafka-console-consumer --bootstrap-server kafka1:9092, kafka2:9091 --topic WIKIPEDIANOBOT --group listen-consumer --property schema.registry.url=http://schema-registry:8081 --property schema.registry.url=http://schema-registry:8081
-    
-prova a lanciare stesso comando con kafka-avro-console-consumer senza property da docker schema-registry, o prova a togliere http in questo.
+    docker exec schema-registry kafka-avro-console-consumer --bootrap-server kafka1:9092,kafka2:9091 --topic WIKIPEDIANOBOT --group listen-consumer
 
 Visualize the list of the consumers groups:
 
