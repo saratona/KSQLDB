@@ -47,7 +47,7 @@ In the folder ./connectors you find the Connectors described above, downloaded f
 | Replicator                | ``wikipedia.parsed``           | ``wikipedia.parsed.replica``          |
 | Elasticsearch sink connector        | ``WIKIPEDIABOT`` (from ksqlDB) | Elasticsearch/Kibana                  |
 
-In this demo are removed all the security references.
+In this demo all the security references has been removed.
 
 ## The docker-compose file
 
@@ -310,7 +310,7 @@ From the ksqlDB CLI prompt create the stream of data from the source:
 CREATE STREAM wikipedia WITH (kafka_topic='wikipedia.parsed', value_format='AVRO');
  ```
  
-This demo creates other two streams: `WIKIPEDIANOBOT` and `WIKIPEDIABOT` which respectively filter for bot = falase and bot = true that suggests if the change at the Wikipedia page was made by a bot or not.
+This demo creates other two streams: `WIKIPEDIANOBOT` and `WIKIPEDIABOT` which respectively filter for bot = false and bot = true that suggests if the change at the Wikipedia page was made by a bot or not.
 
 ```sql
 CREATE STREAM wikipedianobot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = false AND length IS NOT NULL AND length->new IS NOT NULL AND length->old IS NOT NULL;
@@ -338,7 +338,7 @@ You can view messages from different ksqlDB streams and tables. For instance the
 select * from WIKIPEDIA EMIT CHANGES;
 ```
 
-Press Ctrl+C for interrupt the streams of data.
+Press Ctrl+C to interrupt the streams of data.
 
 Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB server properties; check these values with the `docker-compose.yml` file.
 
@@ -393,7 +393,7 @@ CREATE SOURCE CONNECTOR replicate_topic WITH (
 ); 
 ```
 
-In this way it is created a new topic `wikipedia.parsed.replica` that is a replica of `wikipedia.parsed`. 
+In this way we created a new topic `wikipedia.parsed.replica` that is a replica of `wikipedia.parsed`. 
 
 You have to register the same schema for the replicated topic as was created for the original topic. Run the file schema-replica.sh:
   
