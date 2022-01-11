@@ -340,12 +340,15 @@ Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB serve
 
 ## Consumers
 
-Create:
+Consumer lag is the topic’s high water mark (latest offset for the topic that has been written) minus the current consumer offset (latest offset read for that topic by that consumer group). Keep in mind the topic’s write rate and consumer group’s read rate when you consider the significance the consumer lag’s size.
 
-    docker exec zookeeper kafka-console-consumer --bootstrap-server kafka1:9092, kafka2:9091 --topic WIKIPEDIANOBOT --group listen-consumer --property schema.registry.url=http://schema-registry:8081
+Consumer lag is available on a per-consumer basis, including the embedded Connect consumers for sink connectors, ksqlDB queries, console consumers.
+
+Create an additional consumer to read from topic WIKIPEDIANOBOT:
+
+    docker exec zookeeper kafka-console-consumer --bootstrap-server kafka1:9092, kafka2:9091 --topic WIKIPEDIANOBOT --group listen-consumer --property schema.registry.url=http://schema-registry:8081 --property schema.registry.url=http://schema-registry:8081
     
-    docker exec zookeeper kafka-console-consumer --bootstrap-server kafka1:9092, kafka2:9091 --topic WIKIPEDIA_COUNT_GT_1 --group listen-consumer --property schema.registry.url=http://schema-registry:8081
-Prova ad aggiungere --property schema.registry.url=http://schema-registry:8081 alla fine.
+prova a lanciare stesso comando con kafka-avro-console-consumer senza property da docker schema-registry, o prova a togliere http in questo.
 
 Visualize the list of the consumers groups:
 
@@ -358,37 +361,39 @@ Visualize the list of the consumers in the consumer group listen-consumer:
 ## Replication
 
 Replication is the process of having multiple copies of the data for the sole purpose of availability in case one of the brokers goes down and is unavailable to serve the requests.
-In Kafka, replication happens at the partition granularity i.e. copies of the partition are maintained at multiple broker instances using the partition’s write-ahead log. Replication factor defines the number of copies of the partition that needs to be kept; in this demo is set to 2.
+In Kafka, replication happens at the partition granularity i.e. copies of the partition are maintained at multiple broker instances using the partition’s write-ahead log. Replication factor defines the number of copies of the partition that needs to be kept.
 
-Confluent Replicator copies data from a source Kafka cluster to a destination Kafka cluster. The source and destination clusters are typically different clusters, but in this demo, Replicator is doing intra-cluster replication, i.e., the source and destination Kafka clusters are the same.
-Replicator is a Kafka Connect source connector and has a corresponding consumer group `connect-replicator`. To create the connector run this:
+In this demo Replicator copies data from a source Kafka cluster to a destination Kafka cluster. The source and destination clusters are typically different clusters, but in this demo, Replicator is doing intra-cluster replication, i.e., the source and destination Kafka clusters are the same.
+Replicator is a Kafka Connect source connector and has a corresponding consumer group `connect-replicator`. 
+
+Create the connector:
     
-    CREATE SOURCE CONNECTOR replicate_topic WITH (
-        'connector.class' = 'io.confluent.connect.replicator.ReplicatorSourceConnector',
-        'topic.whitelist' = 'wikipedia.parsed',
-        'topic.rename.format' = '\${topic}.replica',
-        'key.converter' = 'io.confluent.connect.replicator.util.ByteArrayConverter',
-        'value.converter' = 'io.confluent.connect.replicator.util.ByteArrayConverter',
+```sql
+CREATE SOURCE CONNECTOR replicate_topic WITH (
+    'connector.class' = 'io.confluent.connect.replicator.ReplicatorSourceConnector',
+    'topic.whitelist' = 'wikipedia.parsed',
+    'topic.rename.format' = '\${topic}.replica',
+    'key.converter' = 'io.confluent.connect.replicator.util.ByteArrayConverter',
+    'value.converter' = 'io.confluent.connect.replicator.util.ByteArrayConverter',
 
-        'dest.kafka.bootstrap.servers' = 'kafka1:9092',
+    'dest.kafka.bootstrap.servers' = 'kafka1:9092',
 
-        'confluent.topic.replication.factor' = 1,
-        'src.kafka.bootstrap.servers' = 'kafka1:9092',
+    'confluent.topic.replication.factor' = 1,
+    'src.kafka.bootstrap.servers' = 'kafka1:9092',
 
-        'src.consumer.group.id' = 'connect-replicator',
+    'src.consumer.group.id' = 'connect-replicator',
 
-        'offset.timestamps.commit' = 'false',
-        'tasks.max' = '1',
-        'provenance.header.enable' = 'false'
-    ); 
-    
-In this way it is created a new topic `wikipedia.parsed.replica`. Register the same schema for the replicated topic wikipedia.parsed.replica as was created for the original topic wikipedia.parsed:
+    'offset.timestamps.commit' = 'false',
+    'tasks.max' = '1',
+    'provenance.header.enable' = 'false'
+); 
+```
 
-    SCHEMA=$docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects/wikipedia.parsed-value/versions/latest | jq .schema)
-    
-    docker-compose exec schema-registry curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data "{\"schema\": $SCHEMA}" http://schema-registry:8081/subjects/wikipedia.parsed.replica-value/versions
-        
-    (se non va -copia risultato del prima comando al posto di $SCHEMA -usa test.sh)
+In this way it is created a new topic `wikipedia.parsed.replica` that is a replica of `wikipedia.parsed`. 
+
+You have to register the same schema for the replicated topic as was created for the original topic. Run the file:
+
+./
 
 In this case the replicated topic will register with the same schema ID as the original topic. Verify wikipedia.parsed.replica topic is populated and schema is registered:
 
