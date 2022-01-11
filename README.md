@@ -448,20 +448,26 @@ Restart the Docker container running Kafka broker 2:
 Now that the ksqlD is up and the stream of data is correctly created, we want to visualize and do some analysis with Kibana/Elasticsearch.
 
 Run the 'set_elasticsearch_mapping_bot.sh' file and 'set_elasticsearch_mapping_count.sh' in the folder dashboard.
+
+    ./dashboard/set_elasticsearch_mapping_bot.sh
+    ./dashboard/set_elasticsearch_mapping_count.sh
+    
 Run the following connector to sink the topic:
 
-    CREATE SINK CONNECTOR elasticsearch_ksqldb WITH (
-        'connector.class' = 'io.confluent.connect.elasticsearch.ElasticsearchSinkConnector',
-        'topics' = 'WIKIPEDIABOT',
-        'topic.index.map' = 'WIKIPEDIABOT:wikipediabot',
-        'connection.url' = 'http://elasticsearch:9200',
-        'type.name' = '_doc',
-        'key.ignore' = true,
-        'key.converter.schema.registry.url' = 'http://schema-registry:8081',
-        'value.converter' = 'io.confluent.connect.avro.AvroConverter',
-        'value.converter.schema.registry.url' = 'http://schema-registry:8081',
-        'schema.ignore' = true
-    );
+```sql
+CREATE SINK CONNECTOR elasticsearch_ksqldb WITH (
+    'connector.class' = 'io.confluent.connect.elasticsearch.ElasticsearchSinkConnector',
+    'topics' = 'WIKIPEDIABOT',
+    'topic.index.map' = 'WIKIPEDIABOT:wikipediabot',
+    'connection.url' = 'http://elasticsearch:9200',
+    'type.name' = '_doc',
+    'key.ignore' = true,
+    'key.converter.schema.registry.url' = 'http://schema-registry:8081',
+    'value.converter' = 'io.confluent.connect.avro.AvroConverter',
+    'value.converter.schema.registry.url' = 'http://schema-registry:8081',
+    'schema.ignore' = true
+);
+```
 
 Check that the data arrived in the index at this location: [http://localhost:5601/app/discover#](http://localhost:5601/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m%2Fm,to:now))&_a=h@1353cf1)
 
