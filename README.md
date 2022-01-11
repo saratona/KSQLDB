@@ -391,17 +391,23 @@ CREATE SOURCE CONNECTOR replicate_topic WITH (
 
 In this way it is created a new topic `wikipedia.parsed.replica` that is a replica of `wikipedia.parsed`. 
 
-You have to register the same schema for the replicated topic as was created for the original topic. Run the file:
+You have to register the same schema for the replicated topic as was created for the original topic. Run the file schema-replica.sh:
+  
+    ./scripts/schema-replica.sh
 
-./
+In this file there are two commands:
+- the first saves the schema of the topic `wikipedia.parsed` in the variable SCHEMA:
+```SCHEMA=$(docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects/wikipedia.parsed-value/versions/latest | jq .schema```
+- the second gives SCHEMA as schema of the topic `wikipedia.parsed.replica`:
+```docker-compose exec schema-registry curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data "{\"schema\": $SCHEMA}" http://schema-registry:8081/subjects/wikipedia.parsed.replica-value/versions```
 
-In this case the replicated topic will register with the same schema ID as the original topic. Verify wikipedia.parsed.replica topic is populated and schema is registered:
+Now verify wikipedia.parsed.replica topic is populated and schema is registered:
 
     docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects
     
 checking if wikipedia.parsed.replica-value is in the list.
 
-Describe the topic just created, which is the topic that Replicator has replicated from wikipedia.parsed:
+Describe the topic just created, which is the topic that Replicator has replicated from `wikipedia.parsed`:
 
     docker-compose exec kafka1 kafka-topics --describe --topic wikipedia.parsed.replica --bootstrap-server kafka1:9092
     
@@ -415,8 +421,18 @@ Stop the Docker container running Kafka broker 2:
 This command will give you the list of the IDs of the active brokers between brackets:
 
     docker exec zookeeper zookeeper-shell localhost:2181 ls /brokers/ids
+
+Note that there is only the ID 1 because broker 2 (kafka2) has been stopped.
     
-Note that there is only the ID 1 because broker 2 (kafka2) has been stopped. Restart the broker:
+From the ksqlDB cli prompt try to view the streams of data as before:
+
+```sql
+select * from WIKIPEDIA EMIT CHANGES;
+```
+
+and note that all is still working.
+
+Restart the Docker container running Kafka broker 2:
 
     docker-compose start kafka2
 
