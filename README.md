@@ -258,9 +258,11 @@ Create the topic `wikipedia.parsed`:
 
     docker-compose exec kafka1 kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 2 --partitions 2 --topic wikipedia.parsed
 
-In an other shell run ksqlDB CLI to get to the ksqlDB CLI prompt:
+Open another shell and run ksqlDB CLI to get to the ksqlDB CLI prompt:
 
     docker exec -it ksqldb-cli ksql http://ksqldb-server:8088
+
+Every ksql command will be run from this shell.
 
 Create the connector between Wikimedia and Kafka topic `wikipedia.parsed` :
 
