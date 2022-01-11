@@ -302,6 +302,8 @@ Describe the only topic that exists up to now, which is the topic that the kafka
 
     docker-compose exec kafka1 kafka-topics --describe --topic wikipedia.parsed --bootstrap-server kafka1:9092
     
+Note the partitions and the replicas.
+    
 From the ksqlDB CLI prompt create the stream of data from the source:
 
 ```sql
