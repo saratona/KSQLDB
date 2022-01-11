@@ -486,23 +486,3 @@ To view the connectors created in this demo type:
 When you're done, tear down the stack by running:
     
     docker-compose down
-
-######################## utility
-
-rimuovere kafka connect
-
-
-    #docker-compose exec connect curl -X POST -H "${HEADER}" --data "${DATA}" http://connect:8083/connectors || exit 1
-
- 
-#Add the custom query property earliest for the auto.offset.reset parameter. This instructs ksqlDB queries to read all available topic data from the beginning. This configuration is used for each subsequent query:
-
-     SET 'auto.offset.reset'='earliest';
-
-create a topic: 
-
-    docker-compose exec kafka1 kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 2 --partitions 2 --topic wikipedia.parsed
-    
-list of consumers:
-
-    docker exec zookeeper kafka-consumer-groups --list --bootstrap-server kafka2:9091
