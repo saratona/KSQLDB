@@ -437,7 +437,7 @@ From the ksqlDB cli prompt try to view the streams of data as before:
 select * from WIKIPEDIA EMIT CHANGES;
 ```
 
-and note that all is still working.
+and note that all is still working. Press Ctrl+C to interrupt the stream.
 
 Restart the Docker container running Kafka broker 2:
 
