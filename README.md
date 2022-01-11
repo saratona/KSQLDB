@@ -449,8 +449,8 @@ Now that the ksqlD is up and the stream of data is correctly created, we want to
 
 Run the 'set_elasticsearch_mapping_bot.sh' file and 'set_elasticsearch_mapping_count.sh' in the folder dashboard.
 
-    ./dashboard/set_elasticsearch_mapping_bot.sh
-    ./dashboard/set_elasticsearch_mapping_count.sh
+    ./scripts/dashboard/set_elasticsearch_mapping_bot.sh
+    ./scripts/dashboard/set_elasticsearch_mapping_count.sh
     
 Run the following connector to sink the topic:
 
@@ -471,7 +471,7 @@ CREATE SINK CONNECTOR elasticsearch_ksqldb WITH (
 
 Create the dashboards to visualize the data on Kibana, running the file 'configure_kibana_dashboard.sh' in the folder dashboard.
 
-    ./dashboard/configure_kibana_dashboard.sh
+    ./scripts/dashboard/configure_kibana_dashboard.sh
 
 Go to [http://localhost:5601/app/dashboards#/view/Overview](http://localhost:5601/app/dashboards#/view/Overview?_g=h@ac5c3b7&_a=h@295d1b7) to visualize the created dashboards.
 
