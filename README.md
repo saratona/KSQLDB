@@ -481,7 +481,7 @@ Go to [http://localhost:5601/app/dashboards#/view/Overview](http://localhost:560
 
 To view the connectors created in this demo type:
 
-    SHOW | LIST CONNECTORS;
+    SHOW CONNECTORS;
     
 When you're done, tear down the stack by running:
     
