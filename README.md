@@ -8,7 +8,7 @@ This example and accompanying tutorial show users how to deploy an Apache Kafka�
 
 ksqlDB is the streaming SQL engine for Apache Kafka®. It provides an easy-to-use yet powerful interactive SQL interface for stream processing on Kafka, without the need to write code in a programming language such as Java or Python. ksqlDB is scalable, elastic, fault-tolerant, and real-time. It supports a wide range of streaming operations, including data filtering, transformations, aggregations, joins, windowing, and sessionization.
 
-Kafka Streams is a Java API that gives you easy access to all of the computational primitives of stream processing: filtering, grouping, aggregating, joining, and more, keeping you from having to write framework code on top of the consumer API to do all those things. It also provides support for the potentially large amounts of state that result from stream processing computations.
+Kafka Streams is a Java API that gives you easy access to all of the computational primitives of stream processing: filtering, grouping, aggregating, joining, and more, keeping you from having to write framework code on top of the consumer API to do all those things. It also provides support for the potentially :octopus:***large amounts of state (cosa intendi con state?) that result*** from stream processing computations.
 
 The use case is a Kafka event streaming application for real-time edits to real Wikipedia pages. Wikimedia Foundation has introduced the EventStreams service that allows anyone to subscribe to recent changes to Wikimedia data: edits happening to real wiki pages (e.g. #en.wikipedia, #en.wiktionary) in real time.
 
@@ -25,14 +25,14 @@ All the applications and connectors used in this demo are configured to automati
 
 ![connect](https://github.com/saratona/KSQLDB/blob/main/images/connect-overview.png)
 
-In the world of information storage and retrieval, some systems are not Kafka. Sometimes you would like the data in those other systems to get into Kafka topics, and sometimes you would like data in Kafka topics to get into those systems. As Apache Kafka's integration API, this is exactly what Kafka Connect does.
+In the world of information storage and retrieval, :octopus:***some (=>most of the)*** systems are not Kafka. Sometimes you would like the data in those other systems to get into Kafka topics, and sometimes you would like data in Kafka topics to get into those systems. As Apache Kafka's integration API, this is exactly what Kafka Connect does.
 Kafka Connect is an open source component of Apache Kafka® that simplifies loading and exporting data between Kafka and external systems. 
 
-Using ksqlDB, you can run any Kafka Connect connector by embedding it in ksqlDB's servers: ksqlDB can double as a Connect server and will run a Distributed Mode cluster co-located on the ksqlDB server instance.
+Using ksqlDB, you can run any Kafka Connect connector by embedding it in ksqlDB's servers: ksqlDB can :octopus: ***double (=>scale up)*** as a Connect server and will run a Distributed Mode cluster co-located on the ksqlDB server instance.
 
 ### The connectors
 
-Wikimedia’s EventStreams publishes a continuous stream of real-time edits happening to real wiki pages. A Kafka source connector [Server Sent Events Source Connector](https://www.confluent.io/hub/cjmatta/kafka-connect-sse) (kafka-connect-sse) streams the server-sent events (SSE) from https://stream.wikimedia.org/v2/stream/recentchange, and a custom Connect transform [Kafka Connect JSON Schema Trasformations](https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema) (kafka-connect-json-schema) extracts the JSON from these messages and then are written to a Kafka cluster. This example uses ksqlDB and a Kafka Streams application for data processing. Then a Kafka sink connector [ElasticSearch Sink Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch) (kafka-connect-elasticsearch) streams the data out of Kafka and is materialized into Elasticsearch for analysis by Kibana. [Replicator](https://www.confluent.io/hub/confluentinc/kafka-connect-replicator) (kafka-connect-replicator) is also copying messages from a topic to another topic in the same cluster. All data is using Schema Registry and Avro.
+Wikimedia’s EventStreams publishes a continuous stream of real-time edits happening to real wiki pages. A Kafka source connector [Server Sent Events Source Connector](https://www.confluent.io/hub/cjmatta/kafka-connect-sse) (kafka-connect-sse) streams the server-sent events (SSE) from https://stream.wikimedia.org/v2/stream/recentchange, and a custom Connect transform [Kafka Connect JSON Schema Trasformations](https://www.confluent.io/hub/jcustenborder/kafka-connect-json-schema) (kafka-connect-json-schema) extracts the JSON from these messages and :octopus:***then are written(=> writes them)*** to a Kafka cluster. This example uses ksqlDB and a Kafka Streams application for data processing. Then a Kafka sink connector [ElasticSearch Sink Connector](https://www.confluent.io/hub/confluentinc/kafka-connect-elasticsearch) (kafka-connect-elasticsearch) streams the data out of Kafka and is materialized into Elasticsearch for analysis by Kibana. [Replicator](https://www.confluent.io/hub/confluentinc/kafka-connect-replicator) (kafka-connect-replicator) is also copying messages from a topic to another topic in the same cluster. All data is using Schema Registry and Avro.
 
 ![kafka](https://github.com/saratona/KSQLDB/blob/main/images/kafka-overview.png)
 
@@ -47,7 +47,7 @@ In the folder ./connectors you find the Connectors described above, downloaded f
 | Replicator                | ``wikipedia.parsed``           | ``wikipedia.parsed.replica``          |
 | Elasticsearch sink connector        | ``WIKIPEDIABOT`` (from ksqlDB) | Elasticsearch/Kibana                  |
 
-In this demo are removed all the security references.
+In this demo :octopus:***are removed all the security references (=> all the security references has been removed)*** .
 
 ## The docker-compose file
 
@@ -310,7 +310,7 @@ From the ksqlDB CLI prompt create the stream of data from the source:
 CREATE STREAM wikipedia WITH (kafka_topic='wikipedia.parsed', value_format='AVRO');
  ```
  
-This demo creates other two streams: `WIKIPEDIANOBOT` and `WIKIPEDIABOT` which respectively filter for bot = falase and bot = true that suggests if the change at the Wikipedia page was made by a bot or not.
+This demo creates other two streams: `WIKIPEDIANOBOT` and `WIKIPEDIABOT` which respectively filter for bot = :octopus: ***falase*** and bot = true that suggests if the change at the Wikipedia page was made by a bot or not.
 
 ```sql
 CREATE STREAM wikipedianobot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = false AND length IS NOT NULL AND length->new IS NOT NULL AND length->old IS NOT NULL;
@@ -338,7 +338,7 @@ You can view messages from different ksqlDB streams and tables. For instance the
 select * from WIKIPEDIA EMIT CHANGES;
 ```
 
-Press Ctrl+C for interrupt the streams of data.
+Press Ctrl+C :octopus:***for (=> to)*** interrupt the streams of data.
 
 Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB server properties; check these values with the `docker-compose.yml` file.
 
@@ -393,7 +393,7 @@ CREATE SOURCE CONNECTOR replicate_topic WITH (
 ); 
 ```
 
-In this way it is created a new topic `wikipedia.parsed.replica` that is a replica of `wikipedia.parsed`. 
+:octopus:***In this way it is created a new topic (=> In this way we created a new topic)*** `wikipedia.parsed.replica` that is a replica of `wikipedia.parsed`. 
 
 You have to register the same schema for the replicated topic as was created for the original topic. Run the file schema-replica.sh:
   
