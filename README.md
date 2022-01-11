@@ -304,22 +304,30 @@ Describe the only topic that exists up to now, which is the topic that the kafka
     
 From the ksqlDB CLI prompt create the stream of data from the source:
 
-    CREATE STREAM wikipedia WITH (kafka_topic='wikipedia.parsed', value_format='AVRO');
-    
+```sql
+CREATE STREAM wikipedia WITH (kafka_topic='wikipedia.parsed', value_format='AVRO');
+ ```
+ 
 This demo creates other two streams: `WIKIPEDIANOBOT` and `WIKIPEDIABOT` which respectively filter for bot = falase and bot = true that suggests if the change at the Wikipedia page was made by a bot or not.
 
-    CREATE STREAM wikipedianobot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = false AND length IS NOT NULL AND length->new IS NOT NULL AND length->old IS NOT NULL;
+```sql
+CREATE STREAM wikipedianobot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = false AND length IS NOT NULL AND length->new IS NOT NULL AND length->old IS NOT NULL;
     
     CREATE STREAM wikipediabot AS SELECT *, (length->new - length->old) AS BYTECHANGE FROM wikipedia WHERE bot = true AND length IS NOT NULL AND length->new IS NOT NULL AND length->old IS NOT NULL;
- 
-Created also a table with a tumbling window which groups and count the changes made by every users (that made at least one modification):
+```
 
-    CREATE TABLE wikipedia_count_gt_1 WITH (key_format='JSON') AS SELECT user, meta->uri AS URI, count(*) AS COUNT FROM wikipedia WINDOW TUMBLING (size 300 second) WHERE meta->domain = 'commons.wikimedia.org' GROUP BY user, meta->uri HAVING count(*) > 1;
-  
+Create also a table with a tumbling window which groups and count the changes made by every users (that made at least one modification):
 
-To view the existing ksqlDB streams type `SHOW STREAMS;`
+```sql
+CREATE TABLE wikipedia_count_gt_1 WITH (key_format='JSON') AS SELECT user, meta->uri AS URI, count(*) AS COUNT FROM wikipedia WINDOW TUMBLING (size 300 second) WHERE meta->domain = 'commons.wikimedia.org' GROUP BY user, meta->uri HAVING count(*) > 1;
+```  
 
-To describe the schema (fields or columns) of an existing ksqlDB stream, for istance WIKIPEDIA type `DESCRIBE WIKIPEDIA;`
+To view the existing ksqlDB streams type 
+```sql
+SHOW STREAMS;
+```
+
+To describe the schema (fields or columns) of an existing ksqlDB stream, for istance WIKIPEDIA type ```sql DESCRIBE WIKIPEDIA;```
 
 View the existing tables typing `SHOW TABLES;`
 
