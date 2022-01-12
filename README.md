@@ -447,7 +447,7 @@ Restart the Docker container running Kafka broker 2:
 
 Now that the ksqlD is up and the stream of data is correctly created, we want to visualize and do some analysis with Kibana/Elasticsearch.
 
-Run the 'set_elasticsearch_mapping_bot.sh' file and 'set_elasticsearch_mapping_count.sh' in the folder dashboard.
+To provide data mapping to Elasticsearch run the 'set_elasticsearch_mapping_bot.sh' and 'set_elasticsearch_mapping_count.sh' files:
 
     ./scripts/dashboard/set_elasticsearch_mapping_bot.sh
     ./scripts/dashboard/set_elasticsearch_mapping_count.sh
@@ -469,7 +469,7 @@ CREATE SINK CONNECTOR elasticsearch_ksqldb WITH (
 );
 ```
 
-Create the dashboards to visualize the data on Kibana, running the file 'configure_kibana_dashboard.sh' in the folder dashboard.
+Create the dashboards to visualize the data on Kibana, running the file 'configure_kibana_dashboard.sh':
 
     ./scripts/dashboard/configure_kibana_dashboard.sh
 
