@@ -127,28 +127,30 @@ services:
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
       
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
-      COMPOSE_HTTP_TIMEOUT: 90
       
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/tmp/helper/log4j.properties"
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 2
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
       
+      KSQL_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
+      KSQL_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+      
       #embedded Kafka Connect
-      KSQL_CONNECT_GROUP_ID: "ksql-connect-cluster"
-      KSQL_CONNECT_BOOTSTRAP_SERVERS: "kafka1:9092,kafka:9091"
-      KSQL_CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
-      KSQL_CONNECT_VALUE_CONVERTER: "io.confluent.connect.avro.AvroConverter"
-      KSQL_CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
-      KSQL_CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
-      KSQL_CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
-      KSQL_CONNECT_CONFIG_STORAGE_TOPIC: "ksql-connect-configs"
-      KSQL_CONNECT_OFFSET_STORAGE_TOPIC: "ksql-connect-offsets"
-      KSQL_CONNECT_STATUS_STORAGE_TOPIC: "ksql-connect-statuses"
-      KSQL_CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 2
-      KSQL_CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 2
-      KSQL_CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 2
-      KSQL_CONNECT_PLUGIN_PATH: "/usr/share/kafka/plugins"
+#      KSQL_CONNECT_GROUP_ID: "ksql-connect-cluster"
+#      KSQL_CONNECT_BOOTSTRAP_SERVERS: "kafka1:9092,kafka:9091"
+#      KSQL_CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+#      KSQL_CONNECT_VALUE_CONVERTER: "io.confluent.connect.avro.AvroConverter"
+#      KSQL_CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+#      KSQL_CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+#      KSQL_CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+#      KSQL_CONNECT_CONFIG_STORAGE_TOPIC: "ksql-connect-configs"
+#      KSQL_CONNECT_OFFSET_STORAGE_TOPIC: "ksql-connect-offsets"
+#      KSQL_CONNECT_STATUS_STORAGE_TOPIC: "ksql-connect-statuses"
+#      KSQL_CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 2
+#      KSQL_CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 2
+#      KSQL_CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 2
+#      KSQL_CONNECT_PLUGIN_PATH: "/usr/share/kafka/plugins"
 
   ksqldb-cli:
     image: confluentinc/ksqldb-cli:0.23.1
@@ -188,4 +190,74 @@ services:
       SERVER_MAXPAYLOADBYTES: 4194304
       KIBANA_AUTOCOMPLETETIMEOUT: 3000
       KIBANA_AUTOCOMPLETETERMINATEAFTER: 2500000
+
+  restproxy:
+    image: confluentinc/cp-kafka-rest:7.0.1
+    restart: always
+    depends_on:
+      - kafka1
+      - kafka2
+      - schema-registry
+    hostname: restproxy
+    container_name: restproxy
+    volumes:
+      - ./scripts/app:/etc/kafka/app
+    ports:
+      - 8086:8086
+    environment:
+      KAFKA_REST_HOST_NAME: restproxy
+      KAFKA_REST_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:9092,PLAINTEXT://kafka2:9091
+      KAFKA_REST_LISTENERS: http://0.0.0.0:8086
+      KAFKA_REST_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+   
+  connect:
+    image: cnfldemos/kafka-connect-datagen:0.5.0-6.2.0
+    hostname: connect
+    container_name: connect
+    depends_on:
+      - kafka1
+      - kafka2
+      - schema-registry
+    ports:
+      - "8083:8083"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9091
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_REST_PORT: 8083
+      CONNECT_LISTENERS: http://0.0.0.0:8083
+      CONNECT_PRODUCER_CLIENT_ID: "connect-worker-producer"
+      CONNECT_PRODUCER_ENABLE_IDEMPOTENCE: 'true'
+      CONNECT_GROUP_ID: "connect-cluster"
       
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-statuses
+      
+      CONNECT_REPLICATION_FACTOR: 2
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 2
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 2
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 2
+      
+      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+      CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
+      
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
+
+  streams-demo:
+    image: cnfldemos/cp-demo-kstreams:0.0.10
+    restart: always
+    depends_on:
+      - kafka1
+      - kafka2
+      - schema-registry
+      - connect
+    hostname: streams-demo
+    container_name: streams-demo
+    env_file:
+      - ./env_files/streams-demo.env
+    environment:
+      KAFKA_REPLICATION_FACTOR: 2
