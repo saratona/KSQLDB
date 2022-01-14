@@ -426,6 +426,8 @@ Visualize the list of the consumers groups:
 
     docker exec zookeeper kafka-consumer-groups --list --bootstrap-server kafka1:9092,kafka2:9091
 
+### Consumer lag
+
 Consumer lag is the topic’s high water mark (latest offset for the topic that has been written) minus the current consumer offset (latest offset read for that topic by that consumer group). Keep in mind the topic’s write rate and consumer group’s read rate when you consider the significance the consumer lag’s size.
 
 Consumer lag is available on a per-consumer basis, including the embedded Connect consumers for sink connectors, ksqlDB queries, console consumers.
