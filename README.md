@@ -524,12 +524,14 @@ View the new schema for the subject `users-value`:
  
 Your output should resemble:
 
-    {
-     "subject": "users-value",
-     "version": 1,
-     "id": 9,
-     "schema": "[{\"type\":\"record\",\"name\":\"user\",\"fields\":[{\"name\":\"userid\",\"type\":\"long\"},{\"name\":\"username\",\"type\":\"string\"}]}]"
-    }
+```json
+{
+  "subject": "users-value",
+  "version": 1,
+  "id": 9,
+  "schema": "[{\"type\":\"record\",\"name\":\"user\",\"fields\":[{\"name\":\"userid\",\"type\":\"long\"},{\"name\":\"username\",\"type\":\"string\"}]}]"
+}
+```
 
 ## REST Proxy
 
