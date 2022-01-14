@@ -504,7 +504,7 @@ Try to register a new Avro schema (a record with two fields username and userid)
  
 Your output should resemble:
 
-    {"id":8}
+    {"id":9}
     
 View the new schema for the subject `users-value`:
 
@@ -515,7 +515,7 @@ Your output should resemble:
     {
      "subject": "users-value",
      "version": 1,
-     "id": 8,
+     "id": 9,
      "schema": "[{\"type\":\"record\",\"name\":\"user\",\"fields\":[{\"name\":\"userid\",\"type\":\"long\"},{\"name\":\"username\",\"type\":\"string\"}]}]"
     }
 
@@ -525,15 +525,19 @@ The Confluent REST Proxy provides a RESTful interface to a Apache Kafka® cluste
 
 Use the REST Proxy, which is listening for HTTPS on port 8086, to try to produce a message to the topic users, referencing schema id 8.
 
-    docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.avro.v2+json" -H "Accept: application/vnd.kafka.v2+json" --data '{"value_schema_id": 8, "records": [{"value": {"user":{"userid": 1, "username": "Bunny Smith"}}}]}' http://restproxy:8086/topics/users
+    docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.avro.v2+json" -H "Accept: application/vnd.kafka.v2+json" --data '{"value_schema_id": 9, "records": [{"value": {"user":{"userid": 1, "username": "Bunny Smith"}}}]}' http://restproxy:8086/topics/users
     
 Your output should resemble:
+
+    {"offsets":[{"partition":1,"offset":0,"error_code":null,"error":null}],"key_schema_id":null,"value_schema_id":9}
 
 Create consumer instance my_avro_consumer:
 
     docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"name": "my_consumer_instance", "format": "avro", "auto.offset.reset": "earliest"}' http://restproxy:8086/consumers/my_avro_consumer
 
 Your output should resemble:
+
+    {"instance_id":"my_consumer_instance","base_uri":"http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance"}
 
 Subscribe my_avro_consumer to the users topic:
 
