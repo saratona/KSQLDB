@@ -506,9 +506,7 @@ Go to [http://localhost:5601/app/dashboards#/view/Overview](http://localhost:560
 
 ## Teardown
 
-To view the connectors created in this demo type:
-
-    SHOW CONNECTORS;
+To view the connectors created in this demo type `SHOW CONNECTORS;` in the ksqlDB CLI prompt:
     
 When you're done, tear down the stack by running:
     
