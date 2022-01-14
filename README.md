@@ -44,7 +44,8 @@ In the folder ./connectors you find the Connectors described above, downloaded f
 |-------------------------------------|--------------------------------|-------------------------------------|
 | SSE source connector                | Wikipedia                      | ``wikipedia.parsed``                  |
 | ksqlDB                              | ``wikipedia.parsed``           | ksqlDB streams and tables             |
-| Replicator                | ``wikipedia.parsed``           | ``wikipedia.parsed.replica``          |
+| Kafka Streams application           | ``wikipedia.parsed``           | ``wikipedia.parsed.count-by-domain``  |
+| Replicator                          | ``wikipedia.parsed``           | ``wikipedia.parsed.replica``          |
 | Elasticsearch sink connector        | ``WIKIPEDIABOT`` (from ksqlDB) | Elasticsearch/Kibana                  |
 
 In this demo all the security references has been removed.
@@ -83,25 +84,25 @@ services:
     environment:
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
-
+      
       KAFKA_BROKER_ID: 1
       KAFKA_BROKER_RACK: "r1"
       KAFKA_JMX_PORT: 9991
-
+      
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:29092
-
+      
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-
+      
       KAFKA_DELETE_TOPIC_ENABLE: 'true'
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
       KAFKA_DEFAULT_REPLICATION_FACTOR: 2
-
+      
       KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
-
+            
   kafka2:
     image: confluentinc/cp-kafka:7.0.1
     hostname: kafka2
@@ -115,25 +116,25 @@ services:
     environment:
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
-
+      
       KAFKA_BROKER_ID: 2
       KAFKA_BROKER_RACK: "r2"
       KAFKA_JMX_PORT: 9992
-
+      
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9091,PLAINTEXT_HOST://localhost:29091
-
+      
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-
+      
       KAFKA_DELETE_TOPIC_ENABLE: 'true'
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
       KAFKA_DEFAULT_REPLICATION_FACTOR: 2
-
+      
       KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
-
+      
   schema-registry:
     image: confluentinc/cp-schema-registry:7.0.1
     hostname: schema-registry
@@ -147,12 +148,12 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       #SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9091
-
+      
       SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
-
+      
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 2
-
+      
       SCHEMA_REGISTRY_DEBUG: 'true'
 
   ksqldb-server:
@@ -171,25 +172,24 @@ services:
       KSQL_KSQL_SERVICE_ID: "ksql-cluster"
       KSQL_KSQL_STREAMS_REPLICATION_FACTOR: 2
       KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: 2
-
+      
       # For Demo purposes: improve resource utilization and avoid timeouts
       KSQL_KSQL_STREAMS_NUM_STREAM_THREADS: 1
-
+      
       KSQL_PRODUCER_ENABLE_IDEMPOTENCE: 'true'
-
+      
       KSQL_LISTENERS: "http://0.0.0.0:8088"
       KSQL_BOOTSTRAP_SERVERS: "kafka1:9092,kafka2:9091"
       KSQL_HOST_NAME: ksqldb-server
       KSQL_CACHE_MAX_BYTES_BUFFERING: 0
-
+      
       KSQL_KSQL_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
-      COMPOSE_HTTP_TIMEOUT: 90
-
+      
       KSQL_LOG4J_OPTS: "-Dlog4j.configuration=file:/tmp/helper/log4j.properties"
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 2
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
-
+      
       #embedded Kafka Connect
       KSQL_CONNECT_GROUP_ID: "ksql-connect-cluster"
       KSQL_CONNECT_BOOTSTRAP_SERVERS: "kafka1:9092,kafka:9091"
@@ -217,7 +217,7 @@ services:
       - ./scripts/ksqlDB/statements.sql:/tmp/statements.sql
     entrypoint: /bin/sh
     tty: true
-
+    
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.0
     hostname: elasticsearch
@@ -229,7 +229,7 @@ services:
       discovery.type: single-node
       ES_JAVA_OPTS: "-Xms1g -Xmx1g"
       cluster.name: "elasticsearch-cp-demo"
-
+      
   kibana:
     image: docker.elastic.co/kibana/kibana-oss:7.10.0
     container_name: kibana
@@ -244,6 +244,75 @@ services:
       SERVER_MAXPAYLOADBYTES: 4194304
       KIBANA_AUTOCOMPLETETIMEOUT: 3000
       KIBANA_AUTOCOMPLETETERMINATEAFTER: 2500000
+
+  restproxy:
+    image: confluentinc/cp-kafka-rest:7.0.1
+    restart: always
+    depends_on:
+      - kafka1
+      - kafka2
+      - schema-registry
+    hostname: restproxy
+    container_name: restproxy
+    volumes:
+      - ./scripts/app:/etc/kafka/app
+    ports:
+      - 8086:8086
+    environment:
+      KAFKA_REST_HOST_NAME: restproxy
+      KAFKA_REST_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:9092,PLAINTEXT://kafka2:9091
+      KAFKA_REST_LISTENERS: http://0.0.0.0:8086
+      KAFKA_REST_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+   
+  connect:
+    image: cnfldemos/kafka-connect-datagen:0.5.0-6.2.0
+    hostname: connect
+    container_name: connect
+    depends_on:
+      - kafka1
+      - kafka2
+      - schema-registry
+    ports:
+      - "8083:8083"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9091
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_REST_PORT: 8083
+      CONNECT_LISTENERS: http://0.0.0.0:8083
+      CONNECT_PRODUCER_CLIENT_ID: "connect-worker-producer"
+      CONNECT_PRODUCER_ENABLE_IDEMPOTENCE: 'true'
+      CONNECT_GROUP_ID: "connect-cluster"
+      
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-statuses
+      
+      CONNECT_REPLICATION_FACTOR: 2
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 2
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 2
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 2
+      
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
+
+  streams-demo:
+    image: cnfldemos/cp-demo-kstreams:0.0.10
+    restart: always
+    depends_on:
+      - kafka1
+      - kafka2
+      - schema-registry
+      - connect
+    hostname: streams-demo
+    container_name: streams-demo
+    env_file:
+      - ./env_files/streams-demo.env
+    environment:
+      KAFKA_REPLICATION_FACTOR: 2
+
 ```
 
 There are a few things to notice here: first of all we have two brokers: kafka1 and kafka2. Each broker hosts some set of partitions and handles incoming requests to write new events to those partitions or read events from them. Brokers also handle replication of partitions between each other. Indeed brokers and their underlying storage are susceptible to failure, so we need to copy partition data to other brokers to keep it safe. As you can see from the `docker-compose.yml` in this demo the replication factor is set to 2.
@@ -344,24 +413,29 @@ Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB serve
 
 ## Consumers
 
+Create a new topic:
+
+    docker-compose exec kafka1 kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 2 --partitions 2 --topic wikipedia.parsed.count-by-domain
+    
+Start consuming from topic wikipedia.parsed with a new consumer group app with one consumer `consumer_app_1`.
+This application is run by the cnfldemos/cp-demo-kstreams Docker container.
+ 
+    ./scripts/app/start_consumer_app.sh 1
+    
+Visualize the list of the consumers groups:
+
+    docker exec zookeeper kafka-consumer-groups --list --bootstrap-server kafka1:9092,kafka2:9091
+
 Consumer lag is the topic’s high water mark (latest offset for the topic that has been written) minus the current consumer offset (latest offset read for that topic by that consumer group). Keep in mind the topic’s write rate and consumer group’s read rate when you consider the significance the consumer lag’s size.
 
 Consumer lag is available on a per-consumer basis, including the embedded Connect consumers for sink connectors, ksqlDB queries, console consumers.
 
-Create an additional consumer to read from topic WIKIPEDIANOBOT:
-
-    docker exec schema-registry kafka-avro-console-consumer --bootrap-server kafka1:9092,kafka2:9091 --topic WIKIPEDIANOBOT --group listen-consumer > /dev/null 2>&1 &
+View consumer lag for the Kafka Streams application under the consumer group id `wikipedia-activity-monitor`:
     
-Running this command from the schema-registry docker the consumer will automatically register with Schema Registry.
-
-Visualize the list of the consumers groups:
-
-    docker exec zookeeper kafka-consumer-groups --list --bootstrap-server kafka2:9091
-
-Visualize the list of the consumers in the consumer group listen-consumer:
-
-    docker exec zookeeper kafka-consumer-groups --bootstrap-server kafka2:9091 --describe --group listen-consumer
+    docker exec zookeeper kafka-consumer-groups --bootstrap-server kafka2:9091,kafka2:9091 --describe --group wikipedia-activity-monitor
  
+ This consumer group app has a single consumer consumer_app_1 consuming all of the partitions in the topic `wikipedia.parsed`.
+
 ## Replication
 
 Replication is the process of having multiple copies of the data for the sole purpose of availability in case one of the brokers goes down and is unavailable to serve the requests.
@@ -430,7 +504,7 @@ Try to register a new Avro schema (a record with two fields username and userid)
  
 Your output should resemble:
 
-    {"id":8}
+    {"id":9}
     
 View the new schema for the subject `users-value`:
 
@@ -441,9 +515,45 @@ Your output should resemble:
     {
      "subject": "users-value",
      "version": 1,
-     "id": 8,
+     "id": 9,
      "schema": "[{\"type\":\"record\",\"name\":\"user\",\"fields\":[{\"name\":\"userid\",\"type\":\"long\"},{\"name\":\"username\",\"type\":\"string\"}]}]"
     }
+
+## REST Proxy
+
+The Confluent REST Proxy provides a RESTful interface to a Apache Kafka® cluster, making it easy to produce and consume messages, view the state of the cluster, and perform administrative actions without using the native Kafka protocol or clients.
+
+Use the REST Proxy, which is listening for HTTPS on port 8086, to try to produce a message to the topic users, referencing schema id 8.
+
+    docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.avro.v2+json" -H "Accept: application/vnd.kafka.v2+json" --data '{"value_schema_id": 9, "records": [{"value": {"user":{"userid": 1, "username": "Bunny Smith"}}}]}' http://restproxy:8086/topics/users
+    
+Your output should resemble:
+
+    {"offsets":[{"partition":1,"offset":0,"error_code":null,"error":null}],"key_schema_id":null,"value_schema_id":9}
+
+Create consumer instance my_avro_consumer:
+
+    docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"name": "my_consumer_instance", "format": "avro", "auto.offset.reset": "earliest"}' http://restproxy:8086/consumers/my_avro_consumer
+
+Your output should resemble:
+
+    {"instance_id":"my_consumer_instance","base_uri":"http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance"}
+
+Subscribe my_avro_consumer to the users topic:
+
+    docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"topics":["users"]}' http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance/subscription
+
+Try to consume messages for my_avro_consumer subscriptions:
+
+    docker-compose exec restproxy curl -X GET -H "Accept: application/vnd.kafka.avro.v2+json" http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance/records
+    
+Your output should resemble:
+
+    [{"topic":"users","key":null,"value":{"userid":1,"username":"Bunny Smith"},"partition":1,"offset":0}]
+
+Delete the consumer instance my_avro_consumer:
+
+    docker-compose exec restproxy curl -X DELETE -H "Content-Type: application/vnd.kafka.v2+json" http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance
     
 ## Failed Broker
 
