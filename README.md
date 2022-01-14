@@ -430,13 +430,19 @@ Visualize the list of the consumers in the consumer group listen-consumer:
 
     docker exec zookeeper kafka-consumer-groups --bootstrap-server kafka2:9091 --describe --group listen-consumer
     
-View consumer lag for the Kafka Streams application under the consumer group id `wikipedia-activity-monitor`. This application is run by the cnfldemos/cp-demo-kstreams Docker container.
-
-    ???
-    
- Start consuming from topic wikipedia.parsed with a new consumer group app with one consumer `consumer_app_1`. It runs in the background.
+Start consuming from topic wikipedia.parsed with a new consumer group app with one consumer `consumer_app_1`.
+This application is run by the cnfldemos/cp-demo-kstreams Docker container.
  
     ./scripts/app/start_consumer_app.sh 1
+    
+Visualize the list of the consumers groups:
+
+    docker exec zookeeper kafka-consumer-groups --list --bootstrap-server kafka1:9092,kafka2:9091
+    
+View consumer lag for the Kafka Streams application under the consumer group id `wikipedia-activity-monitor`:
+    
+    docker exec zookeeper kafka-consumer-groups --bootstrap-server kafka2:9091,kafka2:9091 --describe --group wikipedia-activity-monitor
+
  
  This consumer group app has a single consumer consumer_app_1 consuming all of the partitions in the topic `wikipedia.parsed`.
  
