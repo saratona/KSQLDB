@@ -416,15 +416,6 @@ Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB serve
 Create a new topic:
 
     docker-compose exec kafka1 kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 2 --partitions 2 --topic wikipedia.parsed.count-by-domain
-    
-Start consuming from topic `wikipedia.parsed` with a new consumer group app with one consumer `consumer_app_1`.
-This application is run by the `cnfldemos/cp-demo-kstreams` Docker container.
- 
-    ./scripts/app/start_consumer_app.sh 1
-    
-Visualize the list of the consumers groups:
-
-    docker exec zookeeper kafka-consumer-groups --list --bootstrap-server kafka1:9092,kafka2:9091
 
 ### Consumer lag
 
@@ -432,11 +423,30 @@ Consumer lag is the topic’s high water mark (latest offset for the topic that 
 
 Consumer lag is available on a per-consumer basis, including the embedded Connect consumers for sink connectors, ksqlDB queries, console consumers.
 
+Visualize the list of the consumers groups:
+
+    docker exec zookeeper kafka-consumer-groups --list --bootstrap-server kafka1:9092,kafka2:9091
+
 View consumer lag for the Kafka Streams application under the consumer group id `wikipedia-activity-monitor`:
     
     docker exec zookeeper kafka-consumer-groups --bootstrap-server kafka2:9091,kafka2:9091 --describe --group wikipedia-activity-monitor
+    
+Start consuming from topic `wikipedia.parsed` with a new consumer group `app` with one consumer `consumer_app_1`.
+This application is run by the `cnfldemos/cp-demo-kstreams` Docker container.
  
- This consumer group app has a single consumer consumer_app_1 consuming all of the partitions in the topic `wikipedia.parsed`.
+    ./scripts/app/start_consumer_app.sh 1
+ 
+This consumer group `app` has a single consumer `consumer_app_1` consuming all of the partitions in the topic `wikipedia.parsed`:
+
+    docker exec zookeeper kafka-consumer-groups --bootstrap-server kafka2:9091,kafka2:9091 --describe --group app
+
+Add a second consumer `consumer_app_2` to the existing consumer group `app`:
+
+    ./scripts/app/start_consumer_app.sh 2
+    
+Notice that the consumers `consumer_app_1` and `consumer_app_2` now share consumption of the partitions in the topic `wikipedia.parsed`:
+
+    docker exec zookeeper kafka-consumer-groups --bootstrap-server kafka2:9091,kafka2:9091 --describe --group app
 
 ## Replication
 
