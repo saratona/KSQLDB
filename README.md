@@ -412,6 +412,10 @@ Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB serve
 
 ## Consumers
 
+Create a new topic:
+
+    docker-compose exec kafka1 kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 2 --partitions 2 --topic wikipedia.parsed.count-by-domain
+
 Consumer lag is the topic’s high water mark (latest offset for the topic that has been written) minus the current consumer offset (latest offset read for that topic by that consumer group). Keep in mind the topic’s write rate and consumer group’s read rate when you consider the significance the consumer lag’s size.
 
 Consumer lag is available on a per-consumer basis, including the embedded Connect consumers for sink connectors, ksqlDB queries, console consumers.
