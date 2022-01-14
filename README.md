@@ -417,8 +417,8 @@ Create a new topic:
 
     docker-compose exec kafka1 kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 2 --partitions 2 --topic wikipedia.parsed.count-by-domain
     
-Start consuming from topic wikipedia.parsed with a new consumer group app with one consumer `consumer_app_1`.
-This application is run by the cnfldemos/cp-demo-kstreams Docker container.
+Start consuming from topic `wikipedia.parsed` with a new consumer group app with one consumer `consumer_app_1`.
+This application is run by the `cnfldemos/cp-demo-kstreams` Docker container.
  
     ./scripts/app/start_consumer_app.sh 1
     
