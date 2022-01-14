@@ -527,33 +527,33 @@ The Confluent REST Proxy provides a RESTful interface to a Apache Kafka® cluste
 
       docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.avro.v2+json" -H "Accept: application/vnd.kafka.v2+json" --data '{"value_schema_id": 9, "records": [{"value": {"user":{"userid": 1, "username": "Bunny Smith"}}}]}' http://restproxy:8086/topics/users
     
-Your output should resemble:
+  Your output should resemble:
 
-    {"offsets":[{"partition":1,"offset":0,"error_code":null,"error":null}],"key_schema_id":null,"value_schema_id":9}
+      {"offsets":[{"partition":1,"offset":0,"error_code":null,"error":null}],"key_schema_id":null,"value_schema_id":9}
 
 - Create consumer instance my_avro_consumer:
 
       docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"name": "my_consumer_instance", "format": "avro", "auto.offset.reset": "earliest"}' http://restproxy:8086/consumers/my_avro_consumer
 
-Your output should resemble:
+  Your output should resemble:
 
-    {"instance_id":"my_consumer_instance","base_uri":"http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance"}
+      {"instance_id":"my_consumer_instance","base_uri":"http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance"}
 
-Subscribe my_avro_consumer to the users topic:
+- Subscribe my_avro_consumer to the users topic:
 
-    docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"topics":["users"]}' http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance/subscription
+      docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"topics":["users"]}' http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance/subscription
 
-Try to consume messages for my_avro_consumer subscriptions:
+- Try to consume messages for my_avro_consumer subscriptions:
 
-    docker-compose exec restproxy curl -X GET -H "Accept: application/vnd.kafka.avro.v2+json" http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance/records
+      docker-compose exec restproxy curl -X GET -H "Accept: application/vnd.kafka.avro.v2+json" http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance/records
     
-Your output should resemble:
+  Your output should resemble:
 
-    [{"topic":"users","key":null,"value":{"userid":1,"username":"Bunny Smith"},"partition":1,"offset":0}]
+      [{"topic":"users","key":null,"value":{"userid":1,"username":"Bunny Smith"},"partition":1,"offset":0}]
 
-Delete the consumer instance my_avro_consumer:
+- Delete the consumer instance my_avro_consumer:
 
-    docker-compose exec restproxy curl -X DELETE -H "Content-Type: application/vnd.kafka.v2+json" http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance
+      docker-compose exec restproxy curl -X DELETE -H "Content-Type: application/vnd.kafka.v2+json" http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance
     
 ## Failed Broker
 
