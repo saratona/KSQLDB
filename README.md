@@ -624,7 +624,7 @@ Create the dashboards to visualize the data on Kibana, running the file `configu
 
     ./scripts/dashboard/configure_kibana_dashboard.sh
 
-Go to [http://localhost:5601/app/dashboards#/view/Overview](http://localhost:5601/app/dashboards#/view/Overview?_g=h@ac5c3b7&_a=h@295d1b7) to visualize the created dashboards.
+Go to [http://localhost:5601/app/dashboards#/view/Overview](http://localhost:5601/app/dashboards#/view/Overview?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-30m%2Fm%2Cto%3Anow))) to visualize the created dashboards.
 
 ![kibana](https://github.com/saratona/KSQLDB/blob/main/images/kibana-dashboard.png)
 
