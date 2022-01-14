@@ -444,6 +444,36 @@ Your output should resemble:
      "id": 8,
      "schema": "[{\"type\":\"record\",\"name\":\"user\",\"fields\":[{\"name\":\"userid\",\"type\":\"long\"},{\"name\":\"username\",\"type\":\"string\"}]}]"
     }
+
+## REST Proxy
+
+The Confluent REST Proxy provides a RESTful interface to a Apache Kafka® cluster, making it easy to produce and consume messages, view the state of the cluster, and perform administrative actions without using the native Kafka protocol or clients.
+
+Use the REST Proxy, which is listening for HTTPS on port 8086, to try to produce a message to the topic users, referencing schema id 8.
+
+    docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.avro.v2+json" -H "Accept: application/vnd.kafka.v2+json" --data '{"value_schema_id": 8, "records": [{"value": {"user":{"userid": 1, "username": "Bunny Smith"}}}]}' http://restproxy:8086/topics/users
+    
+Your output should resemble:
+
+Create consumer instance my_avro_consumer:
+
+    docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"name": "my_consumer_instance", "format": "avro", "auto.offset.reset": "earliest"}' http://restproxy:8086/consumers/my_avro_consumer
+
+Your output should resemble:
+
+Subscribe my_avro_consumer to the users topic:
+
+    docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"topics":["users"]}' http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance/subscription
+
+Try to consume messages for my_avro_consumer subscriptions:
+
+    docker-compose exec restproxy curl -X GET -H "Accept: application/vnd.kafka.avro.v2+json" http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance/records
+    
+Your output should resemble:
+
+Delete the consumer instance my_avro_consumer:
+
+    docker-compose exec restproxy curl -X DELETE -H "Content-Type: application/vnd.kafka.v2+json" http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance
     
 ## Failed Broker
 
