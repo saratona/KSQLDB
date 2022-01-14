@@ -537,7 +537,7 @@ Your output should resemble:
 
 The Confluent REST Proxy provides a RESTful interface to a Apache Kafka® cluster, making it easy to produce and consume messages, view the state of the cluster, and perform administrative actions without using the native Kafka protocol or clients.
 
-- Use the REST Proxy, which is listening for HTTPS on port 8086, to try to produce a message to the topic users, referencing schema id 9.
+- Use the REST Proxy, which is listening for HTTPS on port 8086, to try to produce a message to the topic `users`, referencing schema id 9.
 
       docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.avro.v2+json" -H "Accept: application/vnd.kafka.v2+json" --data '{"value_schema_id": 9, "records": [{"value": {"user":{"userid": 1, "username": "Bunny Smith"}}}]}' http://restproxy:8086/topics/users
     
@@ -545,7 +545,7 @@ The Confluent REST Proxy provides a RESTful interface to a Apache Kafka® cluste
 
       {"offsets":[{"partition":1,"offset":0,"error_code":null,"error":null}],"key_schema_id":null,"value_schema_id":9}
 
-- Create consumer instance my_avro_consumer:
+- Create consumer `instance my_avro_consumer`:
 
       docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"name": "my_consumer_instance", "format": "avro", "auto.offset.reset": "earliest"}' http://restproxy:8086/consumers/my_avro_consumer
 
@@ -553,11 +553,11 @@ The Confluent REST Proxy provides a RESTful interface to a Apache Kafka® cluste
 
       {"instance_id":"my_consumer_instance","base_uri":"http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance"}
 
-- Subscribe my_avro_consumer to the users topic:
+- Subscribe `my_avro_consumer` to the `users` topic:
 
       docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"topics":["users"]}' http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance/subscription
 
-- Try to consume messages for my_avro_consumer subscriptions:
+- Try to consume messages for `my_avro_consumer` subscriptions:
 
       docker-compose exec restproxy curl -X GET -H "Accept: application/vnd.kafka.avro.v2+json" http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance/records
     
@@ -565,7 +565,7 @@ The Confluent REST Proxy provides a RESTful interface to a Apache Kafka® cluste
 
       [{"topic":"users","key":null,"value":{"userid":1,"username":"Bunny Smith"},"partition":1,"offset":0}]
 
-- Delete the consumer instance my_avro_consumer:
+- Delete the consumer `instance my_avro_consumer`:
 
       docker-compose exec restproxy curl -X DELETE -H "Content-Type: application/vnd.kafka.v2+json" http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance
     
@@ -580,7 +580,7 @@ This command will give you the list of the IDs of the active brokers between bra
 
     docker exec zookeeper zookeeper-shell localhost:2181 ls /brokers/ids
 
-Note that there is only the ID 1 because broker 2 (kafka2) has been stopped.
+Note that there is only the ID 1 because broker 2 `kafka2` has been stopped.
     
 From the ksqlDB cli prompt try to view the streams of data as before:
 
