@@ -481,12 +481,12 @@ CREATE SOURCE CONNECTOR replicate_topic WITH (
 
 In this way we created a new topic `wikipedia.parsed.replica` that is a replica of `wikipedia.parsed`. 
 
-You have to register the same schema for the replicated topic as was created for the original topic. Run the file schema-replica.sh:
+You have to register the same schema for the replicated topic as was created for the original topic. Run the file `schema-replica.sh`:
   
     ./scripts/schema-replica.sh
 
 In this file there are two commands:
-- the first saves the schema of the topic `wikipedia.parsed` in the variable SCHEMA:
+- the first saves the schema of the topic `wikipedia.parsed` in the variable `SCHEMA`:
 
       SCHEMA=$(docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects/wikipedia.parsed-value/versions/latest | jq .schema
     
@@ -494,11 +494,11 @@ In this file there are two commands:
 
       docker-compose exec schema-registry curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data "{\"schema\": $SCHEMA}" http://schema-registry:8081/subjects/wikipedia.parsed.replica-value/versions
 
-Now verify wikipedia.parsed.replica topic is populated and schema is registered:
+Now verify `wikipedia.parsed.replica` topic is populated and schema is registered:
 
     docker-compose exec schema-registry curl -s -X GET http://schema-registry:8081/subjects
     
-checking if wikipedia.parsed.replica-value is in the list.
+checking if `wikipedia.parsed.replica-value` is in the list.
 
 Describe the topic just created, which is the topic that Replicator has replicated from `wikipedia.parsed`:
 
