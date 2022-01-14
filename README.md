@@ -361,7 +361,23 @@ Visualize the list of the consumers groups:
 Visualize the list of the consumers in the consumer group listen-consumer:
 
     docker exec zookeeper kafka-consumer-groups --bootstrap-server kafka2:9091 --describe --group listen-consumer
+    
+View consumer lag for the Kafka Streams application under the consumer group id `wikipedia-activity-monitor`. This application is run by the cnfldemos/cp-demo-kstreams Docker container.
+
+    ???
+    
+ Start consuming from topic wikipedia.parsed with a new consumer group app with one consumer `consumer_app_1`. It runs in the background.
  
+    ./scripts/app/start_consumer_app.sh 1
+ 
+ This consumer group app has a single consumer consumer_app_1 consuming all of the partitions in the topic `wikipedia.parsed`.
+ 
+ Add a second consumer consumer_app_2 to the existing consumer group app:
+ 
+    ./scripts/app/start_consumer_app.sh 2
+    
+ Notice that the consumers consumer_app_1 and consumer_app_2 now share consumption of the partitions in the topic wikipedia.parsed.
+
 ## Replication
 
 Replication is the process of having multiple copies of the data for the sole purpose of availability in case one of the brokers goes down and is unavailable to serve the requests.
