@@ -418,6 +418,20 @@ Describe the topic just created, which is the topic that Replicator has replicat
 
     docker-compose exec kafka1 kafka-topics --describe --topic wikipedia.parsed.replica --bootstrap-server kafka1:9092
     
+## Data Governance with Schema Registry
+
+Try to register a new Avro schema (a record with two fields username and userid) into Schema Registry for the value of a new topic `users`. Note the schema id that it returns, e.g. below schema id is 8.
+
+    docker-compose exec schema-registry curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data '{ "schema": "[ { \"type\":\"record\", \"name\":\"user\", \"fields\": [ {\"name\":\"userid\",\"type\":\"long\"}, {\"name\":\"username\",\"type\":\"string\"} ]} ]" }' http://schema-registry:8081/subjects/users-value/versions
+ 
+Your output should resemble:
+
+    {"id":8}
+    
+View the new schema for the subject `users-value`:
+
+    docker-compose exec schema-registry curl -X GET http://schema-registry:8081/subjects/users-value/versions/1 | jq .
+    
 ## Failed Broker
 
 To simulate a failed broker, stop the Docker container running one of the two Kafka brokers.
