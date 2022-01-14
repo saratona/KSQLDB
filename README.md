@@ -416,24 +416,6 @@ Run the `SHOW PROPERTIES;` statement and you can see the configured ksqlDB serve
 Create a new topic:
 
     docker-compose exec kafka1 kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 2 --partitions 2 --topic wikipedia.parsed.count-by-domain
-
-Consumer lag is the topic’s high water mark (latest offset for the topic that has been written) minus the current consumer offset (latest offset read for that topic by that consumer group). Keep in mind the topic’s write rate and consumer group’s read rate when you consider the significance the consumer lag’s size.
-
-Consumer lag is available on a per-consumer basis, including the embedded Connect consumers for sink connectors, ksqlDB queries, console consumers.
-
-Create an additional consumer to read from topic WIKIPEDIANOBOT:
-
-    docker exec schema-registry kafka-avro-console-consumer --bootrap-server kafka1:9092,kafka2:9091 --topic WIKIPEDIANOBOT --group listen-consumer > /dev/null 2>&1 &
-    
-Running this command from the schema-registry docker the consumer will automatically register with Schema Registry.
-
-Visualize the list of the consumers groups:
-
-    docker exec zookeeper kafka-consumer-groups --list --bootstrap-server kafka2:9091
-
-Visualize the list of the consumers in the consumer group listen-consumer:
-
-    docker exec zookeeper kafka-consumer-groups --bootstrap-server kafka2:9091 --describe --group listen-consumer
     
 Start consuming from topic wikipedia.parsed with a new consumer group app with one consumer `consumer_app_1`.
 This application is run by the cnfldemos/cp-demo-kstreams Docker container.
@@ -443,19 +425,16 @@ This application is run by the cnfldemos/cp-demo-kstreams Docker container.
 Visualize the list of the consumers groups:
 
     docker exec zookeeper kafka-consumer-groups --list --bootstrap-server kafka1:9092,kafka2:9091
-    
+
+Consumer lag is the topic’s high water mark (latest offset for the topic that has been written) minus the current consumer offset (latest offset read for that topic by that consumer group). Keep in mind the topic’s write rate and consumer group’s read rate when you consider the significance the consumer lag’s size.
+
+Consumer lag is available on a per-consumer basis, including the embedded Connect consumers for sink connectors, ksqlDB queries, console consumers.
+
 View consumer lag for the Kafka Streams application under the consumer group id `wikipedia-activity-monitor`:
     
     docker exec zookeeper kafka-consumer-groups --bootstrap-server kafka2:9091,kafka2:9091 --describe --group wikipedia-activity-monitor
-
  
  This consumer group app has a single consumer consumer_app_1 consuming all of the partitions in the topic `wikipedia.parsed`.
- 
- Add a second consumer consumer_app_2 to the existing consumer group app:
- 
-    ./scripts/app/start_consumer_app.sh 2
-    
- Notice that the consumers consumer_app_1 and consumer_app_2 now share consumption of the partitions in the topic wikipedia.parsed.
 
 ## Replication
 
