@@ -538,7 +538,7 @@ The Confluent REST Proxy provides a RESTful interface to a Apache Kafka® cluste
 
       {"offsets":[{"partition":1,"offset":0,"error_code":null,"error":null}],"key_schema_id":null,"value_schema_id":9}
 
-- Create consumer `instance my_avro_consumer`:
+- Create consumer instance `my_avro_consumer`:
 
       docker-compose exec restproxy curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"name": "my_consumer_instance", "format": "avro", "auto.offset.reset": "earliest"}' http://restproxy:8086/consumers/my_avro_consumer
 
