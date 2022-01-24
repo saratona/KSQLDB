@@ -199,8 +199,6 @@ services:
       - kafka1
       - kafka2
       - ksqldb-server
-    volumes:
-      - ./scripts/ksqlDB/statements.sql:/tmp/statements.sql
     entrypoint: /bin/sh
     tty: true
     
