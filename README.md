@@ -558,7 +558,7 @@ The Confluent REST Proxy provides a RESTful interface to a Apache Kafka® cluste
 
       [{"topic":"users","key":null,"value":{"userid":1,"username":"Bunny Smith"},"partition":1,"offset":0}]
 
-- Delete the consumer `instance my_avro_consumer`:
+- Delete the consumer instance `my_avro_consumer`:
 
       docker-compose exec restproxy curl -X DELETE -H "Content-Type: application/vnd.kafka.v2+json" http://restproxy:8086/consumers/my_avro_consumer/instances/my_consumer_instance
     
