@@ -14,7 +14,7 @@ The use case is a Kafka event streaming application for real-time edits to real 
 
 Follow the accompanying guided tutorial, broken down step-by-step, to learn how Kafka works with Schema Registry, Kafka Streams and Connect.
 
-## Schema registry
+## Schema Registry
 
 ![schemaregistry](https://github.com/saratona/KSQLDB/blob/main/images/schemaregistry-overview.png)
 Schema Registry is a standalone server process that runs on a machine external to the Kafka brokers. Its job is to maintain a database of all of the schemas that have been written into topics in the cluster for which it is responsible. That “database” is persisted in an internal Kafka topic and cached in the Schema Registry for low-latency access.
