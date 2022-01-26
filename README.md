@@ -1,6 +1,6 @@
 # ksqlDB Tutorial - Wikipedia changes analysis
 
-This material is derived from the [cp-demo](https://docs.confluent.io/5.5.0/tutorials/cp-demo/docs/index.html) in the [confluentinc github](https://github.com/confluentinc/cp-demo).
+This material is derived from the [cp-demo](https://docs.confluent.io/5.5.0/tutorials/cp-demo/docs/index.html) in the [confluentinc github](https://github.com/confluentinc/cp-demo) removing all the dependences with the Confluent Platform and any security configuration.
 
 ## Overview
 
